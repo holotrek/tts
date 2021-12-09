@@ -1,0 +1,314 @@
+[
+  {
+    "name": "AS",
+    "description": "Ace of Spades",
+    "gmNotes": "Spades",
+    "lua": "function onObjectDrop(color, card)\n  broadcastToAll(color..' player dropped the '..card.getDescription())\nend"
+  },
+  {
+    "name": "2S",
+    "description": "2 of Spades",
+    "gmNotes": "Spades",
+    "lua": "function onObjectDrop(color, card)\n  broadcastToAll(color..' player dropped the '..card.getDescription())\nend"
+  },
+  {
+    "name": "3S",
+    "description": "3 of Spades",
+    "gmNotes": "Spades",
+    "lua": "function onObjectDrop(color, card)\n  broadcastToAll(color..' player dropped the '..card.getDescription())\nend"
+  },
+  {
+    "name": "4S",
+    "description": "4 of Spades",
+    "gmNotes": "Spades",
+    "lua": "function onObjectDrop(color, card)\n  broadcastToAll(color..' player dropped the '..card.getDescription())\nend"
+  },
+  {
+    "name": "5S",
+    "description": "5 of Spades",
+    "gmNotes": "Spades",
+    "lua": "function onObjectDrop(color, card)\n  broadcastToAll(color..' player dropped the '..card.getDescription())\nend"
+  },
+  {
+    "name": "6S",
+    "description": "6 of Spades",
+    "gmNotes": "Spades",
+    "lua": "function onObjectDrop(color, card)\n  broadcastToAll(color..' player dropped the '..card.getDescription())\nend"
+  },
+  {
+    "name": "7S",
+    "description": "7 of Spades",
+    "gmNotes": "Spades",
+    "lua": "function onObjectDrop(color, card)\n  broadcastToAll(color..' player dropped the '..card.getDescription())\nend"
+  },
+  {
+    "name": "8S",
+    "description": "8 of Spades",
+    "gmNotes": "Spades",
+    "lua": "function onObjectDrop(color, card)\n  broadcastToAll(color..' player dropped the '..card.getDescription())\nend"
+  },
+  {
+    "name": "9S",
+    "description": "9 of Spades",
+    "gmNotes": "Spades",
+    "lua": "function onObjectDrop(color, card)\n  broadcastToAll(color..' player dropped the '..card.getDescription())\nend"
+  },
+  {
+    "name": "10S",
+    "description": "10 of Spades",
+    "gmNotes": "Spades",
+    "lua": "function onObjectDrop(color, card)\n  broadcastToAll(color..' player dropped the '..card.getDescription())\nend"
+  },
+  {
+    "name": "JS",
+    "description": "Jack of Spades",
+    "gmNotes": "Spades",
+    "lua": "function onObjectDrop(color, card)\n  broadcastToAll(color..' player dropped the '..card.getDescription())\nend"
+  },
+  {
+    "name": "QS",
+    "description": "Queen of Spades",
+    "gmNotes": "Spades",
+    "lua": "function onObjectDrop(color, card)\n  broadcastToAll(color..' player dropped the '..card.getDescription())\nend"
+  },
+  {
+    "name": "KS",
+    "description": "King of Spades",
+    "gmNotes": "Spades",
+    "lua": "function onObjectDrop(color, card)\n  broadcastToAll(color..' player dropped the '..card.getDescription())\nend"
+  },
+  {
+    "name": "AH",
+    "description": "Ace of Hearts",
+    "gmNotes": "Hearts",
+    "lua": "function onObjectDrop(color, card)\n  broadcastToAll(color..' player dropped the '..card.getDescription())\nend"
+  },
+  {
+    "name": "2H",
+    "description": "2 of Hearts",
+    "gmNotes": "Hearts",
+    "lua": "function onObjectDrop(color, card)\n  broadcastToAll(color..' player dropped the '..card.getDescription())\nend"
+  },
+  {
+    "name": "3H",
+    "description": "3 of Hearts",
+    "gmNotes": "Hearts",
+    "lua": "function onObjectDrop(color, card)\n  broadcastToAll(color..' player dropped the '..card.getDescription())\nend"
+  },
+  {
+    "name": "4H",
+    "description": "4 of Hearts",
+    "gmNotes": "Hearts",
+    "lua": "function onObjectDrop(color, card)\n  broadcastToAll(color..' player dropped the '..card.getDescription())\nend"
+  },
+  {
+    "name": "5H",
+    "description": "5 of Hearts",
+    "gmNotes": "Hearts",
+    "lua": "function onObjectDrop(color, card)\n  broadcastToAll(color..' player dropped the '..card.getDescription())\nend"
+  },
+  {
+    "name": "6H",
+    "description": "6 of Hearts",
+    "gmNotes": "Hearts",
+    "lua": "function onObjectDrop(color, card)\n  broadcastToAll(color..' player dropped the '..card.getDescription())\nend"
+  },
+  {
+    "name": "7H",
+    "description": "7 of Hearts",
+    "gmNotes": "Hearts",
+    "lua": "function onObjectDrop(color, card)\n  broadcastToAll(color..' player dropped the '..card.getDescription())\nend"
+  },
+  {
+    "name": "8H",
+    "description": "8 of Hearts",
+    "gmNotes": "Hearts",
+    "lua": "function onObjectDrop(color, card)\n  broadcastToAll(color..' player dropped the '..card.getDescription())\nend"
+  },
+  {
+    "name": "9H",
+    "description": "9 of Hearts",
+    "gmNotes": "Hearts",
+    "lua": "function onObjectDrop(color, card)\n  broadcastToAll(color..' player dropped the '..card.getDescription())\nend"
+  },
+  {
+    "name": "10H",
+    "description": "10 of Hearts",
+    "gmNotes": "Hearts",
+    "lua": "function onObjectDrop(color, card)\n  broadcastToAll(color..' player dropped the '..card.getDescription())\nend"
+  },
+  {
+    "name": "JH",
+    "description": "Jack of Hearts",
+    "gmNotes": "Hearts",
+    "lua": "function onObjectDrop(color, card)\n  broadcastToAll(color..' player dropped the '..card.getDescription())\nend"
+  },
+  {
+    "name": "QH",
+    "description": "Queen of Hearts",
+    "gmNotes": "Hearts",
+    "lua": "function onObjectDrop(color, card)\n  broadcastToAll(color..' player dropped the '..card.getDescription())\nend"
+  },
+  {
+    "name": "KH",
+    "description": "King of Hearts",
+    "gmNotes": "Hearts",
+    "lua": "function onObjectDrop(color, card)\n  broadcastToAll(color..' player dropped the '..card.getDescription())\nend"
+  },
+  {
+    "name": "AC",
+    "description": "Ace of Clubs",
+    "gmNotes": "Clubs",
+    "lua": "function onObjectDrop(color, card)\n  broadcastToAll(color..' player dropped the '..card.getDescription())\nend"
+  },
+  {
+    "name": "2C",
+    "description": "2 of Clubs",
+    "gmNotes": "Clubs",
+    "lua": "function onObjectDrop(color, card)\n  broadcastToAll(color..' player dropped the '..card.getDescription())\nend"
+  },
+  {
+    "name": "3C",
+    "description": "3 of Clubs",
+    "gmNotes": "Clubs",
+    "lua": "function onObjectDrop(color, card)\n  broadcastToAll(color..' player dropped the '..card.getDescription())\nend"
+  },
+  {
+    "name": "4C",
+    "description": "4 of Clubs",
+    "gmNotes": "Clubs",
+    "lua": "function onObjectDrop(color, card)\n  broadcastToAll(color..' player dropped the '..card.getDescription())\nend"
+  },
+  {
+    "name": "5C",
+    "description": "5 of Clubs",
+    "gmNotes": "Clubs",
+    "lua": "function onObjectDrop(color, card)\n  broadcastToAll(color..' player dropped the '..card.getDescription())\nend"
+  },
+  {
+    "name": "6C",
+    "description": "6 of Clubs",
+    "gmNotes": "Clubs",
+    "lua": "function onObjectDrop(color, card)\n  broadcastToAll(color..' player dropped the '..card.getDescription())\nend"
+  },
+  {
+    "name": "7C",
+    "description": "7 of Clubs",
+    "gmNotes": "Clubs",
+    "lua": "function onObjectDrop(color, card)\n  broadcastToAll(color..' player dropped the '..card.getDescription())\nend"
+  },
+  {
+    "name": "8C",
+    "description": "8 of Clubs",
+    "gmNotes": "Clubs",
+    "lua": "function onObjectDrop(color, card)\n  broadcastToAll(color..' player dropped the '..card.getDescription())\nend"
+  },
+  {
+    "name": "9C",
+    "description": "9 of Clubs",
+    "gmNotes": "Clubs",
+    "lua": "function onObjectDrop(color, card)\n  broadcastToAll(color..' player dropped the '..card.getDescription())\nend"
+  },
+  {
+    "name": "10C",
+    "description": "10 of Clubs",
+    "gmNotes": "Clubs",
+    "lua": "function onObjectDrop(color, card)\n  broadcastToAll(color..' player dropped the '..card.getDescription())\nend"
+  },
+  {
+    "name": "JC",
+    "description": "Jack of Clubs",
+    "gmNotes": "Clubs",
+    "lua": "function onObjectDrop(color, card)\n  broadcastToAll(color..' player dropped the '..card.getDescription())\nend"
+  },
+  {
+    "name": "QC",
+    "description": "Queen of Clubs",
+    "gmNotes": "Clubs",
+    "lua": "function onObjectDrop(color, card)\n  broadcastToAll(color..' player dropped the '..card.getDescription())\nend"
+  },
+  {
+    "name": "KC",
+    "description": "King of Clubs",
+    "gmNotes": "Clubs",
+    "lua": "function onObjectDrop(color, card)\n  broadcastToAll(color..' player dropped the '..card.getDescription())\nend"
+  },
+  {
+    "name": "AD",
+    "description": "Ace of Diamonds",
+    "gmNotes": "Diamonds",
+    "lua": "function onObjectDrop(color, card)\n  broadcastToAll(color..' player dropped the '..card.getDescription())\nend"
+  },
+  {
+    "name": "2D",
+    "description": "2 of Diamonds",
+    "gmNotes": "Diamonds",
+    "lua": "function onObjectDrop(color, card)\n  broadcastToAll(color..' player dropped the '..card.getDescription())\nend"
+  },
+  {
+    "name": "3D",
+    "description": "3 of Diamonds",
+    "gmNotes": "Diamonds",
+    "lua": "function onObjectDrop(color, card)\n  broadcastToAll(color..' player dropped the '..card.getDescription())\nend"
+  },
+  {
+    "name": "4D",
+    "description": "4 of Diamonds",
+    "gmNotes": "Diamonds",
+    "lua": "function onObjectDrop(color, card)\n  broadcastToAll(color..' player dropped the '..card.getDescription())\nend"
+  },
+  {
+    "name": "5D",
+    "description": "5 of Diamonds",
+    "gmNotes": "Diamonds",
+    "lua": "function onObjectDrop(color, card)\n  broadcastToAll(color..' player dropped the '..card.getDescription())\nend"
+  },
+  {
+    "name": "6D",
+    "description": "6 of Diamonds",
+    "gmNotes": "Diamonds",
+    "lua": "function onObjectDrop(color, card)\n  broadcastToAll(color..' player dropped the '..card.getDescription())\nend"
+  },
+  {
+    "name": "7D",
+    "description": "7 of Diamonds",
+    "gmNotes": "Diamonds",
+    "lua": "function onObjectDrop(color, card)\n  broadcastToAll(color..' player dropped the '..card.getDescription())\nend"
+  },
+  {
+    "name": "8D",
+    "description": "8 of Diamonds",
+    "gmNotes": "Diamonds",
+    "lua": "function onObjectDrop(color, card)\n  broadcastToAll(color..' player dropped the '..card.getDescription())\nend"
+  },
+  {
+    "name": "9D",
+    "description": "9 of Diamonds",
+    "gmNotes": "Diamonds",
+    "lua": "function onObjectDrop(color, card)\n  broadcastToAll(color..' player dropped the '..card.getDescription())\nend"
+  },
+  {
+    "name": "10D",
+    "description": "10 of Diamonds",
+    "gmNotes": "Diamonds",
+    "lua": "function onObjectDrop(color, card)\n  broadcastToAll(color..' player dropped the '..card.getDescription())\nend"
+  },
+  {
+    "name": "JD",
+    "description": "Jack of Diamonds",
+    "gmNotes": "Diamonds",
+    "lua": "function onObjectDrop(color, card)\n  broadcastToAll(color..' player dropped the '..card.getDescription())\nend"
+  },
+  {
+    "name": "QD",
+    "description": "Queen of Diamonds",
+    "gmNotes": "Diamonds",
+    "lua": "function onObjectDrop(color, card)\n  broadcastToAll(color..' player dropped the '..card.getDescription())\nend"
+  },
+  {
+    "name": "KD",
+    "description": "King of Diamonds",
+    "gmNotes": "Diamonds",
+    "lua": "function onObjectDrop(color, card)\n  broadcastToAll(color..' player dropped the '..card.getDescription())\nend"
+  }
+]
