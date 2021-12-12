@@ -1,0 +1,795 @@
+--[[    Character Sheet Template    by: MrStump
+
+You can set up your own character sheet if you follow these steps.
+
+Step 1) Change the character sheet image
+    -Right click on the character sheet, click Custom
+    -Replace the image URL with one for your character sheet
+    -Click import, make sure your sheet loads
+    -SAVE THE GAME (the table setup)
+    -LOAD FROM THAT SAVE YOU JUST MADE
+
+Step 2) Edit script to fit your character sheet
+    -Below you will see some general options, and then the big data table
+    -The data table is what determines how many of which buttons are made
+        -Checkboxes
+        -Counters
+        -Textboxes
+    -By default, there are 3 of each. You can add more or remove entries
+    -If you intend to add/remove, be sure only to add/remove ENTRIES
+        -This is what an entry looks like:
+            {
+                pos   = {-0.977,0.1,-0.589},
+                size  = 800,
+                state = false
+            },
+        -Deleting the whole thing would remove that specific item on the sheet
+        -Copy and pasting it after another entry would create another
+    -Each entry type has unique data points (pos, size, state, etc)
+        -Do not try to add in your own data points or remove them individually
+        -There is a summary of what each point does at the top of its category
+
+Step 3) Save and check script changes
+    -Hit Save & Apply in the script window to save your code
+    -You can edit your code as needed and Save+Apply as often as needed
+    -When you are finished, make disableSave = false below then Save+apply
+        -This enables saving, so your sheet will remember whats on it.
+
+Bonus) Finding/Editing Positions for elements
+    I have included a tool to get positions for buttons in {x,y,z} form
+    Place it where you want the center of your element to be
+    Then copy the table from the notes (lower right of screen)
+        You can highlight it and CTRL+C
+    Paste it into the data table where needed (pos=)
+    If you want to manually tweek the values:
+        {0,0,0} is the center of the character sheet
+        {1,0,0} is right, {-1,0,0} is left
+        {0,0,-1} is up, {0,0,1} is down
+        0.1 for Y is the height off of the page.
+            If it was 0, it would be down inside the model of the sheet
+
+Begin editing below:    ]]
+
+--Set this to true while editing and false when you have finished
+disableSave = true
+--Remember to set this to false once you are done making changes
+--Then, after you save & apply it, save your game too
+
+--Color information for input text (r,g,b, values of 0-1)
+inputFontColor = {0,0,0}
+--Color information for input background
+inputColor = {1,1,1}
+--Color information for button text (r,g,b, values of 0-1)
+buttonFontColor = {0,0,0}
+--Color information for button background
+buttonColor = {0,0.8,0.8}
+--Change scale of button (Avoid changing if possible)
+buttonScale = {0.1,0.1,0.1}
+
+--This is the button placement information
+  --[[
+    The listed properties can be set on a field collection, or individual fields.
+    Individual fields may be either an object with those properties or just a position.
+    Properties defined on fields override properties defined on the collection.
+  ]]
+defaultButtonData = {
+  --Add checkboxes
+  checkbox = {
+    --[[
+      pos   = the position (pasted from the helper tool)
+      size  = height/width/font_size for checkbox
+      state = default starting value for checkbox (true=checked, false=not)
+      func   = name of function that takes the index from this table, and button index
+    ]]
+    SpellsPrepared = {
+      size = 300,
+      fields = {
+        --Level1
+        {-1.46,0.05,-0.240},
+        {-1.46,0.05,-0.164},
+        {-1.46,0.05,-0.088},
+        {-1.46,0.05,-0.012},
+        {-1.46,0.05,0.064},
+        {-1.46,0.05,0.140},
+        {-1.46,0.05,0.216},
+        {-1.46,0.05,0.292},
+        {-1.46,0.05,0.368},
+        {-1.46,0.05,0.444},
+        {-1.46,0.05,0.520},
+        {-1.46,0.05,0.596},
+        {-1.46,0.05,0.672},
+        --Level2
+        {-1.46,0.05,0.987},
+        {-1.46,0.05,1.063},
+        {-1.46,0.05,1.139},
+        {-1.46,0.05,1.215},
+        {-1.46,0.05,1.291},
+        {-1.46,0.05,1.367},
+        {-1.46,0.05,1.443},
+        {-1.46,0.05,1.519},
+        {-1.46,0.05,1.595},
+        {-1.46,0.05,1.671},
+        {-1.46,0.05,1.747},
+        {-1.46,0.05,1.823},
+        {-1.46,0.05,1.899},
+        --Level3
+        {-0.44,0.05,-1.158},
+        {-0.44,0.05,-1.082},
+        {-0.44,0.05,-1.006},
+        {-0.44,0.05,-0.930},
+        {-0.44,0.05,-0.854},
+        {-0.44,0.05,-0.778},
+        {-0.44,0.05,-0.702},
+        {-0.44,0.05,-0.626},
+        {-0.44,0.05,-0.550},
+        {-0.44,0.05,-0.474},
+        {-0.44,0.05,-0.398},
+        {-0.44,0.05,-0.322},
+        {-0.44,0.05,-0.246},
+        --Level4
+        {-0.44,0.05,0.064},
+        {-0.44,0.05,0.140},
+        {-0.44,0.05,0.216},
+        {-0.44,0.05,0.292},
+        {-0.44,0.05,0.368},
+        {-0.44,0.05,0.444},
+        {-0.44,0.05,0.520},
+        {-0.44,0.05,0.596},
+        {-0.44,0.05,0.672},
+        {-0.44,0.05,0.748},
+        {-0.44,0.05,0.824},
+        {-0.44,0.05,0.900},
+        {-0.44,0.05,0.976},
+        --Level5
+        {-0.44,0.05,1.291},
+        {-0.44,0.05,1.367},
+        {-0.44,0.05,1.443},
+        {-0.44,0.05,1.519},
+        {-0.44,0.05,1.595},
+        {-0.44,0.05,1.671},
+        {-0.44,0.05,1.747},
+        {-0.44,0.05,1.823},
+        {-0.44,0.05,1.899},
+        --Level6
+        {0.57,0.05,-1.158},
+        {0.57,0.05,-1.082},
+        {0.57,0.05,-1.006},
+        {0.57,0.05,-0.930},
+        {0.57,0.05,-0.854},
+        {0.57,0.05,-0.778},
+        {0.57,0.05,-0.702},
+        {0.57,0.05,-0.626},
+        {0.57,0.05,-0.550},
+        --Level7
+        {0.57,0.05,-0.246},
+        {0.57,0.05,-0.164},
+        {0.57,0.05,-0.088},
+        {0.57,0.05,-0.012},
+        {0.57,0.05,0.064},
+        {0.57,0.05,0.140},
+        {0.57,0.05,0.216},
+        {0.57,0.05,0.292},
+        {0.57,0.05,0.368},
+        --Level8
+        {0.57,0.05,0.672},
+        {0.57,0.05,0.748},
+        {0.57,0.05,0.824},
+        {0.57,0.05,0.900},
+        {0.57,0.05,0.976},
+        {0.57,0.05,1.063},
+        {0.57,0.05,1.139},
+        --Level9
+        {0.57,0.05,1.443},
+        {0.57,0.05,1.519},
+        {0.57,0.05,1.595},
+        {0.57,0.05,1.671},
+        {0.57,0.05,1.747},
+        {0.57,0.05,1.823},
+        {0.57,0.05,1.899},
+      },
+    },
+    --End of checkboxes
+  },
+  --Add counters that have a + and - button
+  counter = {
+    --[[
+      pos    = the position (pasted from the helper tool)
+      size   = height/width/font_size for counter
+      value  = default starting value for counter
+      hideBG = if background of counter is hidden (true=hidden, false=not)
+      min    = minimum allowed value (leave empty for no limit)
+      min    = maximum allowed value (leave empty for no limit)
+      func   = name of function that takes the index from this table,
+                button index, and delta (1 or -1)
+    ]]
+    SpellSlots = {
+      size = 550,
+      value = 0,
+      hideBG = false,
+      min = 0,
+      alignment = 3,
+      fields = {
+        Total1 = {-1.27,0.05,-0.39},
+        Expended1 = {-0.85,0.05,-0.39},
+        Total2 = {-1.27,0.05,0.845},
+        Expended2 = {-0.85,0.05,0.845},
+        Total3 = {-0.25,0.05,-1.295},
+        Expended3 = {0.17,0.05,-1.295},
+        Total4 = {-0.25,0.05,-0.075},
+        Expended4 = {0.17,0.05,-0.075},
+        Total5 = {-0.25,0.05,1.145},
+        Expended5 = {0.17,0.05,1.145},
+        Total6 = {0.76,0.05,-1.295},
+        Expended6 = {1.18,0.05,-1.295},
+        Total7 = {0.76,0.05,-0.38},
+        Expended7 = {1.18,0.05,-0.38},
+        Total8 = {0.76,0.05,0.54},
+        Expended8 = {1.18,0.05,0.54},
+        Total9 = {0.76,0.05,1.297},
+        Expended9 = {1.18,0.05,1.297},
+      },
+    },
+    --End of counters
+  },
+  --Add editable text boxes
+  textbox = {
+    --[[
+      pos       = the position (pasted from the helper tool)
+      rows      = how many lines of text you want for this box
+      width     = how wide the text box is
+      font_size = size of text. This and "rows" effect overall height
+      label     = what is shown when there is no text. "" = nothing
+      value     = text entered into box. "" = nothing
+      alignment = Number to indicate how you want text aligned
+                  (1=Automatic, 2=Left, 3=Center, 4=Right, 5=Justified)
+      hideBG    = if background of counter is hidden (true=hidden, false=not)
+      func      = name of function that takes the index from this table,
+                  the value, and whether it is currently selected
+    ]]
+    Cantrips = {
+      rows      = 1,
+      width     = 4450,
+      font_size = 300,
+      alignment = 2,
+      fields = {
+        {-1.01,0.05,-1.176},
+        {-1.01,0.05,-1.100},
+        {-1.01,0.05,-1.024},
+        {-1.01,0.05,-0.948},
+        {-1.01,0.05,-0.872},
+        {-1.01,0.05,-0.796},
+        {-1.01,0.05,-0.720},
+        {-1.01,0.05,-0.644},
+      }
+    },
+    Spells = {
+      rows      = 1,
+      width     = 4100,
+      font_size = 300,
+      alignment = 2,
+      fields = {
+        --Level1
+        {-0.98,0.05,-0.258},
+        {-0.98,0.05,-0.182},
+        {-0.98,0.05,-0.106},
+        {-0.98,0.05,-0.030},
+        {-0.98,0.05,0.046},
+        {-0.98,0.05,0.122},
+        {-0.98,0.05,0.198},
+        {-0.98,0.05,0.274},
+        {-0.98,0.05,0.350},
+        {-0.98,0.05,0.426},
+        {-0.98,0.05,0.502},
+        {-0.98,0.05,0.578},
+        {-0.98,0.05,0.654},
+        --Level2
+        {-0.98,0.05,0.969},
+        {-0.98,0.05,1.045},
+        {-0.98,0.05,1.121},
+        {-0.98,0.05,1.197},
+        {-0.98,0.05,1.273},
+        {-0.98,0.05,1.349},
+        {-0.98,0.05,1.425},
+        {-0.98,0.05,1.501},
+        {-0.98,0.05,1.577},
+        {-0.98,0.05,1.653},
+        {-0.98,0.05,1.729},
+        {-0.98,0.05,1.805},
+        {-0.98,0.05,1.881},
+        --Level3
+        {0.04,0.05,-1.176},
+        {0.04,0.05,-1.100},
+        {0.04,0.05,-1.024},
+        {0.04,0.05,-0.948},
+        {0.04,0.05,-0.872},
+        {0.04,0.05,-0.796},
+        {0.04,0.05,-0.720},
+        {0.04,0.05,-0.644},
+        {0.04,0.05,-0.568},
+        {0.04,0.05,-0.492},
+        {0.04,0.05,-0.416},
+        {0.04,0.05,-0.340},
+        {0.04,0.05,-0.264},
+        --Level4
+        {0.04,0.05,0.046},
+        {0.04,0.05,0.122},
+        {0.04,0.05,0.198},
+        {0.04,0.05,0.274},
+        {0.04,0.05,0.350},
+        {0.04,0.05,0.426},
+        {0.04,0.05,0.502},
+        {0.04,0.05,0.578},
+        {0.04,0.05,0.654},
+        {0.04,0.05,0.730},
+        {0.04,0.05,0.806},
+        {0.04,0.05,0.882},
+        {0.04,0.05,0.958},
+        --Level5
+        {0.04,0.05,1.273},
+        {0.04,0.05,1.349},
+        {0.04,0.05,1.425},
+        {0.04,0.05,1.501},
+        {0.04,0.05,1.577},
+        {0.04,0.05,1.653},
+        {0.04,0.05,1.729},
+        {0.04,0.05,1.805},
+        {0.04,0.05,1.881},
+        --Level6
+        {1.05,0.05,-1.176},
+        {1.05,0.05,-1.100},
+        {1.05,0.05,-1.024},
+        {1.05,0.05,-0.948},
+        {1.05,0.05,-0.872},
+        {1.05,0.05,-0.796},
+        {1.05,0.05,-0.720},
+        {1.05,0.05,-0.644},
+        {1.05,0.05,-0.568},
+        --Level7
+        {1.05,0.05,-0.258},
+        {1.05,0.05,-0.182},
+        {1.05,0.05,-0.106},
+        {1.05,0.05,-0.030},
+        {1.05,0.05,0.046},
+        {1.05,0.05,0.122},
+        {1.05,0.05,0.198},
+        {1.05,0.05,0.274},
+        {1.05,0.05,0.350},
+        --Level8
+        {1.05,0.05,0.654},
+        {1.05,0.05,0.730},
+        {1.05,0.05,0.806},
+        {1.05,0.05,0.882},
+        {1.05,0.05,0.958},
+        {1.05,0.05,1.045},
+        {1.05,0.05,1.121},
+        --Level9
+        {1.05,0.05,1.425},
+        {1.05,0.05,1.501},
+        {1.05,0.05,1.577},
+        {1.05,0.05,1.653},
+        {1.05,0.05,1.729},
+        {1.05,0.05,1.805},
+        {1.05,0.05,1.881},
+      },
+    },
+    --End of textboxes
+  },
+  --Add noneditable labels
+  label = {
+    --[[
+      name      = unique name of the label
+      pos       = the position (pasted from the helper tool)
+      rows      = how many lines of text you want for this box
+      width     = how wide the text box is
+      font_size = size of text. This and "rows" effect overall height
+      hideBG    = if background of counter is hidden (true=hidden, false=not)
+      value     = text shown
+    ]]
+    Level = {
+      pos       = {1.404,0.05,-2.02},
+      rows      = 1,
+      width     = 1000,
+      font_size = 800,
+      hideBG    = true
+    },
+    Class = {
+      pos       = {-0.9,0.05,-1.73},
+      rows      = 1,
+      width     = 4500,
+      font_size = 550,
+      hideBG    = true
+    },
+    Spellcasting = {
+      rows      = 1,
+      width     = 1000,
+      font_size = 800,
+      hideBG    = true,
+      fields = {
+        Ability = {
+          pos       = {0.055,0.05,-1.77},
+          width     = 2000,
+          font_size = 350,
+        },
+        SaveDC = {0.6,0.05,-1.77},
+        AttackBonus = {1.15,0.05,-1.77}
+      },
+    },
+    --End of labels
+  },
+}
+
+-- Global vars
+
+classAbilityMap = {
+  Barbarian = 'None',
+  Bard = 'Charisma',
+  Cleric = 'Wisdom',
+  Druid = 'Wisdom',
+  Fighter = 'Intelligence',
+  Monk = 'Wisdom',
+  Paladin = 'Charisma',
+  Ranger = 'Wisdom',
+  Rogue = 'Intelligence',
+  Sorceror = 'Charisma',
+  Warlock = 'Charisma',
+  Wizard = 'Intelligence'
+}
+
+-- Load functions
+
+function loadCharacterSheetData()
+  local sheetData = {
+    checkbox = {},
+    counter = {},
+    textbox = {},
+    label = {},
+  }
+  for _, s in ipairs(self.getStates()) do
+    if s.id < self.getStateId() then
+      local json = s.lua_script_state
+      if json ~= '' then
+        sheetData = JSON.decode(json)
+      end
+    end
+  end
+
+  if sheetData.counter.Level then
+    updateLabel(ref_buttonData.label.Level, sheetData.counter.Level.value)
+  end
+
+  if sheetData.textbox.Overview and sheetData.textbox.Overview.fields.Class then
+    local class = sheetData.textbox.Overview.fields.Class.value
+    local abilityMod = classAbilityMap[class] or 'None'
+    updateLabel(ref_buttonData.label.Class, class)
+    updateLabel(ref_buttonData.label.Spellcasting.fields.Ability, abilityMod)
+
+    local attackBonus = sheetData.counter.ProficiencyBonus.value
+    if abilityMod ~= 'None' then
+      local modType = string.sub(abilityMod, 1, 3)
+      local mod = sheetData.label.AbilityModifiers.fields[modType..'AbilityMod']
+      if mod ~= nil then
+        attackBonus = attackBonus + mod.value
+      end
+    end
+    updateLabel(ref_buttonData.label.Spellcasting.fields.SaveDC, 8 + attackBonus)
+    updateLabel(ref_buttonData.label.Spellcasting.fields.AttackBonus, attackBonus)
+
+    if classAbilityMap[class] == nil then
+      local name = sheetData.textbox.CharacterName.value
+      local classList = ''
+      local j = 1
+      for i, _ in pairs(classAbilityMap) do
+        if j < 12 then
+          classList = classList..i..', '
+        else
+          classList = classList..' or '..i
+        end
+        j = j + 1
+      end
+      printToAll('[ffaa00]Warning: [ffffff]Spellcasting sheet for '..name..' has invalid class: [ff0000]'..class..'[ffffff]. Must be one of the following with correct capitalization and spelling: [00cc00]'..classList)
+    end
+  end
+end
+
+--Lua beyond this point, I recommend doing something more fun with your life
+
+
+
+--Save function
+function updateSave()
+  saved_data = JSON.encode(ref_buttonData)
+  if disableSave==true then saved_data="" end
+  self.script_state = saved_data
+end
+
+--Startup procedure
+function onload(saved_data)
+  if disableSave==true then saved_data="" end
+  if saved_data ~= "" then
+    local loaded_data = JSON.decode(saved_data)
+    ref_buttonData = loaded_data
+  else
+    ref_buttonData = defaultButtonData
+  end
+
+  spawnedButtonCount = 0
+  createCheckbox()
+  createCounter()
+  createTextbox()
+  createLabel()
+  loadCharacterSheetData()
+end
+
+
+
+--Click functions for buttons
+
+
+--Checks or unchecks the given box
+function click_checkbox(controlData)
+  if controlData.state == true then
+    controlData.state = false
+    self.editButton({ index = controlData.buttonIndex, label = "" })
+  else
+    controlData.state = true
+    self.editButton({ index = controlData.buttonIndex, label = string.char(10008) })
+  end
+  updateSave()
+end
+
+--Applies value to given counter display
+function click_counter(controlData, amount)
+  controlData.value = controlData.value + amount
+  self.editButton({
+    index = controlData.buttonIndex,
+    label = controlData.value
+  })
+  updateSave()
+end
+
+--Updates saved value for given text box
+function click_textbox(controlData, value, selected)
+  if selected == false then
+    controlData.value = value
+    updateSave()
+  end
+end
+
+--Updates saved value for given label
+function updateLabel(controlData, value)
+  controlData.value = value
+  self.editButton({
+    index = controlData.buttonIndex,
+    label = value,
+  })
+  updateSave()
+end
+
+--Dud function for if you have a background on a counter
+function click_none() end
+
+
+--Button creation
+
+
+--Makes checkboxes
+function createCheckbox()
+  for i, data in pairs(getControlData(ref_buttonData.checkbox, {})) do
+    --Sets up reference function
+    data.buttonIndex = spawnedButtonCount
+    local funcName = "checkbox"..i
+    local func = function()
+      click_checkbox(data)
+      if data.func and _G[data.func] then
+        _G[data.func](data)
+      end
+    end
+    self.setVar(funcName, func)
+    --Sets up label
+    local label = ""
+    if data.state == true then label = string.char(10008) end
+    --Creates button and counts it
+    self.createButton({
+      label = label,
+      click_function = funcName,
+      function_owner = self,
+      position = data.pos,
+      height = data.size,
+      width = data.size,
+      font_size = data.size,
+      scale = buttonScale,
+      color = buttonColor,
+      font_color = buttonFontColor
+    })
+    spawnedButtonCount = spawnedButtonCount + 1
+  end
+end
+
+--Makes counters
+function createCounter()
+  for i, data in pairs(getControlData(ref_buttonData.counter, {})) do
+    --Sets up display
+    data.buttonIndex = spawnedButtonCount
+    --Sets up label
+    local label = data.value
+    --Sets height/width for display
+    local size = data.size
+    if data.hideBG == true then size = 0 end
+    --Creates button and counts it
+    self.createButton({
+      label = label,
+      click_function = "click_none",
+      function_owner = self,
+      position = data.pos,
+      height = size,
+      width = size,
+      font_size = data.size,
+      scale = buttonScale,
+      color = buttonColor,
+      font_color = buttonFontColor
+    })
+    spawnedButtonCount = spawnedButtonCount + 1
+
+    --Sets up add 1
+    local funcName = "counterAdd"..i
+    local func = function()
+      if not data.max or data.max >= data.value + 1 then
+        click_counter(data, 1)
+        if data.func and _G[data.func] then
+          _G[data.func](data, 1)
+        end
+      end
+    end
+    self.setVar(funcName, func)
+    --Sets up label
+    local label = "+"
+    --Sets up position
+    local offsetDistance = (data.size/2 + data.size/4) * (buttonScale[1] * 0.002)
+    local pos = {data.pos[1] + offsetDistance, data.pos[2], data.pos[3]}
+    --Sets up size
+    local size = data.size / 2
+    --Creates button and counts it
+    self.createButton({
+      label = label,
+      click_function = funcName,
+      function_owner = self,
+      position = pos,
+      height = size,
+      width = size,
+      font_size = size,
+      scale = buttonScale,
+      color = buttonColor,
+      font_color = buttonFontColor
+    })
+    spawnedButtonCount = spawnedButtonCount + 1
+
+    --Sets up subtract 1
+    local funcName = "counterSub"..i
+    local func = function()
+      if not data.min or data.min <= data.value - 1 then
+        click_counter(data, -1)
+        if data.func and _G[data.func] then
+          _G[data.func](data, -1)
+        end
+      end
+    end
+    self.setVar(funcName, func)
+    --Sets up label
+    local label = "-"
+    --Set up position
+    local pos = {data.pos[1] - offsetDistance, data.pos[2], data.pos[3]}
+    --Creates button and counts it
+    self.createButton({
+      label = label,
+      click_function = funcName,
+      function_owner = self,
+      position = pos,
+      height = size,
+      width = size,
+      font_size = size,
+      scale = buttonScale,
+      color = buttonColor,
+      font_color = buttonFontColor
+    })
+    spawnedButtonCount = spawnedButtonCount + 1
+  end
+end
+
+function createTextbox()
+  for i, data in pairs(getControlData(ref_buttonData.textbox, {})) do
+    --Sets up reference function
+    local funcName = "textbox"..i
+    local func = function(_,_,val,sel)
+      click_textbox(data, val, sel)
+      if data.func and _G[data.func] then
+        _G[data.func](data, val, sel)
+      end
+    end
+    self.setVar(funcName, func)
+
+    local bgColor = { inputColor[1], inputColor[2], inputColor[3] }
+    local fontColor = { inputFontColor[1], inputFontColor[2], inputFontColor[3] }
+    if data.hideBG then
+      table.insert(bgColor, 0)
+      table.insert(fontColor, 255)
+    end
+    self.createInput({
+      input_function = funcName,
+      function_owner = self,
+      label          = data.label or "",
+      alignment      = data.alignment,
+      position       = data.pos,
+      scale          = buttonScale,
+      width          = data.width,
+      height         = (data.font_size*data.rows)+24,
+      font_size      = data.font_size,
+      color          = bgColor,
+      font_color     = fontColor,
+      value          = data.value or "",
+    })
+  end
+end
+
+function createLabel()
+  for i, data in pairs(getControlData(ref_buttonData.label, {})) do
+    data.buttonIndex = spawnedButtonCount
+    local bgColor = { inputColor[1], inputColor[2], inputColor[3] }
+    local fontColor = { inputFontColor[1], inputFontColor[2], inputFontColor[3] }
+    if data.hideBG then
+      table.insert(bgColor, 0)
+      table.insert(fontColor, 255)
+    end
+    self.createButton({
+      click_function = 'noop',
+      function_owner = self,
+      label          = data.value,
+      position       = data.pos,
+      scale          = buttonScale,
+      width          = data.width,
+      height         = (data.font_size*data.rows)+24,
+      font_size      = data.font_size,
+      color          = bgColor,
+      font_color     = fontColor,
+    })
+    spawnedButtonCount = spawnedButtonCount + 1
+  end
+end
+
+function getControlData(items, defaultAttrs)
+  local controls = {}
+
+  if items ~= nil then
+    for key, item in pairs(items) do
+      if item.fields ~= nil then
+        local children = getControlData(item.fields, item)
+        for _, c in pairs(children) do
+          table.insert(controls, c)
+        end
+      else
+        local result = {}
+        for k, v in pairs(defaultAttrs) do
+          if k ~= 'fields' then
+            result[k] = v
+          end
+        end
+
+        if item.pos ~= nil then
+          for k, v in pairs(item) do
+            result[k] = v
+          end
+        else
+          result.pos = item
+        end
+
+        result.name = key
+        items[key] = result
+        table.insert(controls, result)
+      end
+    end
+  end
+
+  return controls
+end
+
+function noop()
+end
