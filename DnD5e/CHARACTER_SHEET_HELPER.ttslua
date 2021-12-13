@@ -1,0 +1,362 @@
+-- D&D 5e Fillable Character, Details, and Spellcasting Sheet
+-- Author: Thor's Hammer
+-- Adapted from Character Sheet Template by: MrStump
+
+sheets = {}
+function onLoad(save_state)
+  self.createButton({
+    click_function = '_click_none',
+    function_owner = self,
+    label          = 'Main Sheet Script\n\nDO NOT DELETE',
+    position       = {0,0.1,0},
+    scale          = {2,2,2},
+  })
+end
+
+-- Public functions
+
+--[[
+  Creates a sheet data table that can be passed to other functions in this script.
+    params (table) - the main parameters collection for this function, containing:
+      SheetObj (table) - The token or tile object containing the character sheet
+      SavedData (string) - The initial data passed to onload
+      ControlData (table) - The control layout for the sheet
+      DisableSave (boolean) -
+        Set this to true while editing and false when you have finished.
+        Remember to set this to false once you are done making changes
+        Then, after you save & apply it, save your game too
+      InputFontColor (vector) default {0,0,0} - Color information for input text (r,g,b, values of 0-1)
+      InputColor (vector) default {1,1,1} - Color information for input background
+      ButtonFontColor (vector) default {0,0,0} - Color information for button text (r,g,b, values of 0-1)
+      ButtonColor (vector) default {1,1,1} - Color information for button background
+      ButtonScale (vector) default {0.1,0.1,0.1} - Change scale of button (Avoid changing if possible)
+]]
+function initializeSheet(params)
+  sheet = {
+    Object = params.SheetObj,
+    SaveDisabled = params.DisableSave or false,
+    InputFontColor = params.InputFontColor or {0,0,0},
+    InputColor = params.InputColor or {1,1,1},
+    ButtonFontColor = params.ButtonFontColor or {0,0,0},
+    ButtonColor = params.ButtonColor or {1,1,1},
+    ButtonScale = params.ButtonScale or {0.1,0.1,0.1},
+  }
+
+  if sheet.SaveDisabled==true then params.SavedData="" end
+  if params.SavedData ~= "" then
+    local loaded_data = JSON.decode(params.SavedData)
+    sheets[sheet.Object.getGUID()] = loaded_data
+  else
+    sheets[sheet.Object.getGUID()] = params.ControlData
+  end
+
+  sheet.SpawnedButtonCount = 0
+  _createCheckbox(sheet)
+  _createCounter(sheet)
+  _createTextbox(sheet)
+  _createLabel(sheet)
+  return sheet
+end
+
+function getData(sheet)
+  return sheets[sheet.Object.getGUID()]
+end
+
+--[[
+  Updates displayed and saved value for given label
+    params (table)
+      sheet (table) - The sheet handler object
+      controlData (table) - The control to update
+      value (string) - The value to update it to
+]]
+function updateLabel(params)
+  local control = _getByMultiIndex(getData(params.sheet).label, params.indexer)
+  if control ~= nil then
+    control.value = params.value
+    params.sheet.Object.editButton({
+      index = control.buttonIndex,
+      label = params.value,
+    })
+    _updateSave(params.sheet)
+  end
+end
+
+-- Private functions
+
+function _getByMultiIndex(sheetData, indexer)
+  local curControl = sheetData
+  for i, idx in ipairs(indexer) do
+    curControl = curControl[idx]
+  end
+  return curControl
+end
+
+function _updateSave(sheet)
+  local saved_data = JSON.encode(getData(sheet))
+  if sheet.SaveDisabled==true then saved_data="" end
+  sheet.Object.script_state = saved_data
+end
+
+--Click functions for buttons
+
+--Checks or unchecks the given box
+function _click_checkbox(sheet, controlData)
+  if controlData.state == true then
+    controlData.state = false
+    sheet.Object.editButton({ index = controlData.buttonIndex, label = "" })
+  else
+    controlData.state = true
+    sheet.Object.editButton({ index = controlData.buttonIndex, label = string.char(10008) })
+  end
+  _updateSave(sheet)
+end
+
+--Applies value to given counter display
+function _click_counter(sheet, controlData, amount)
+  controlData.value = controlData.value + amount
+  sheet.Object.editButton({
+    index = controlData.buttonIndex,
+    label = controlData.value
+  })
+  _updateSave(sheet)
+end
+
+--Updates saved value for given text box
+function _click_textbox(sheet, controlData, value, selected)
+  if selected == false then
+    controlData.value = value
+    _updateSave(sheet)
+  end
+end
+
+--Dud function for if you have a background on a counter
+function _click_none() end
+
+
+--Button creation
+
+
+--Makes checkboxes
+function _createCheckbox(sheet)
+  for i, data in pairs(_getControlData(getData(sheet).checkbox, {})) do
+    --Sets up reference function
+    data.buttonIndex = sheet.SpawnedButtonCount
+    local funcName = sheet.Object.getGUID().."_checkbox"..i
+    local func = function()
+      _click_checkbox(sheet, data)
+      if data.func then
+        sheet.Object.call(data.func, { data = data })
+      end
+    end
+    self.setVar(funcName, func)
+    --Sets up label
+    local label = ""
+    if data.state == true then label = string.char(10008) end
+    --Creates button and counts it
+    sheet.Object.createButton({
+      label = label,
+      click_function = funcName,
+      function_owner = self,
+      position = data.pos,
+      height = data.size,
+      width = data.size,
+      font_size = data.size,
+      scale = sheet.ButtonScale,
+      color = sheet.ButtonColor,
+      font_color = sheet.ButtonFontColor
+    })
+    sheet.SpawnedButtonCount = sheet.SpawnedButtonCount + 1
+  end
+end
+
+--Makes counters
+function _createCounter(sheet)
+  for i, data in pairs(_getControlData(getData(sheet).counter, {})) do
+    --Sets up display
+    data.buttonIndex = sheet.SpawnedButtonCount
+    --Sets up label
+    local label = data.value
+    --Sets height/width for display
+    local size = data.size
+    if data.hideBG == true then size = 0 end
+    --Creates button and counts it
+    sheet.Object.createButton({
+      label = label,
+      click_function = "_click_none",
+      function_owner = self,
+      position = data.pos,
+      height = size,
+      width = size,
+      font_size = data.size,
+      scale = sheet.ButtonScale,
+      color = sheet.ButtonColor,
+      font_color = sheet.ButtonFontColor
+    })
+    sheet.SpawnedButtonCount = sheet.SpawnedButtonCount + 1
+
+    --Sets up add 1
+    local funcName = sheet.Object.getGUID().."_counterAdd"..i
+    local func = function()
+      if not data.max or data.max >= data.value + 1 then
+        _click_counter(sheet, data, 1)
+        if data.func then
+          sheet.Object.call(data.func, { data = data, delta = 1 })
+        end
+      end
+    end
+    self.setVar(funcName, func)
+    --Sets up label
+    local label = "+"
+    --Sets up position
+    local offsetDistance = (data.size/2 + data.size/4) * (sheet.ButtonScale[1] * 0.002)
+    local pos = {data.pos[1] + offsetDistance, data.pos[2], data.pos[3]}
+    --Sets up size
+    local size = data.size / 2
+    --Creates button and counts it
+    sheet.Object.createButton({
+      label = label,
+      click_function = funcName,
+      function_owner = self,
+      position = pos,
+      height = size,
+      width = size,
+      font_size = size,
+      scale = sheet.ButtonScale,
+      color = sheet.ButtonColor,
+      font_color = sheet.ButtonFontColor
+    })
+    sheet.SpawnedButtonCount = sheet.SpawnedButtonCount + 1
+
+    --Sets up subtract 1
+    local funcName = sheet.Object.getGUID().."_counterSub"..i
+    local func = function()
+      if not data.min or data.min <= data.value - 1 then
+        _click_counter(sheet, data, -1)
+        if data.func then
+          sheet.Object.call(data.func, { data = data, delta = -1 })
+        end
+      end
+    end
+    self.setVar(funcName, func)
+    --Sets up label
+    local label = "-"
+    --Set up position
+    local pos = {data.pos[1] - offsetDistance, data.pos[2], data.pos[3]}
+    --Creates button and counts it
+    sheet.Object.createButton({
+      label = label,
+      click_function = funcName,
+      function_owner = self,
+      position = pos,
+      height = size,
+      width = size,
+      font_size = size,
+      scale = sheet.ButtonScale,
+      color = sheet.ButtonColor,
+      font_color = sheet.ButtonFontColor
+    })
+    sheet.SpawnedButtonCount = sheet.SpawnedButtonCount + 1
+  end
+end
+
+function _createTextbox(sheet)
+  local allControls = _getControlData(getData(sheet).textbox, {})
+  table.sort(allControls, function(a, b)
+    return (a.sortOrder or 0) < (b.sortOrder or 0)
+  end)
+  for i, data in pairs(allControls) do
+    --Sets up reference function
+    local funcName = sheet.Object.getGUID().."_textbox"..i
+    local func = function(_,_,val,sel)
+      _click_textbox(sheet, data, val, sel)
+      if data.func then
+        sheet.Object.call(data.func, { data = data, isSelected = sel })
+      end
+    end
+    self.setVar(funcName, func)
+
+    local bgColor = { sheet.InputColor[1], sheet.InputColor[2], sheet.InputColor[3] }
+    local fontColor = { sheet.InputFontColor[1], sheet.InputFontColor[2], sheet.InputFontColor[3] }
+    if data.hideBG then
+      table.insert(bgColor, 0)
+      table.insert(fontColor, 255)
+    end
+    sheet.Object.createInput({
+      input_function = funcName,
+      function_owner = self,
+      label          = data.label or "",
+      alignment      = data.alignment,
+      position       = data.pos,
+      scale          = sheet.ButtonScale,
+      width          = data.width,
+      height         = (data.font_size*data.rows)+24,
+      font_size      = data.font_size,
+      color          = bgColor,
+      font_color     = fontColor,
+      value          = data.value or "",
+    })
+  end
+end
+
+function _createLabel(sheet)
+  for i, data in pairs(_getControlData(getData(sheet).label, {})) do
+    data.buttonIndex = sheet.SpawnedButtonCount
+    local bgColor = { sheet.InputColor[1], sheet.InputColor[2], sheet.InputColor[3] }
+    local fontColor = { sheet.InputFontColor[1], sheet.InputFontColor[2], sheet.InputFontColor[3] }
+    if data.hideBG then
+      table.insert(bgColor, 0)
+      table.insert(fontColor, 255)
+    end
+    sheet.Object.createButton({
+      click_function = '_click_none',
+      function_owner = self,
+      label          = data.value,
+      position       = data.pos,
+      scale          = sheet.ButtonScale,
+      width          = data.width,
+      height         = (data.font_size*data.rows)+24,
+      font_size      = data.font_size,
+      color          = bgColor,
+      font_color     = fontColor,
+    })
+    sheet.SpawnedButtonCount = sheet.SpawnedButtonCount + 1
+  end
+end
+
+-- helpers
+
+function _getControlData(items, defaultAttrs)
+  local controls = {}
+
+  if items ~= nil then
+    for key, item in pairs(items) do
+      if item.fields ~= nil then
+        local children = _getControlData(item.fields, item)
+        for _, c in pairs(children) do
+          table.insert(controls, c)
+        end
+      else
+        local result = {}
+        for k, v in pairs(defaultAttrs) do
+          if k ~= 'fields' then
+            result[k] = v
+          end
+        end
+
+        if item.pos ~= nil then
+          for k, v in pairs(item) do
+            result[k] = v
+          end
+        else
+          result.pos = item
+        end
+
+        result.name = key
+        items[key] = result
+        table.insert(controls, result)
+      end
+    end
+  end
+
+  return controls
+end

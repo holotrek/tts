@@ -1,70 +1,113 @@
---[[    Character Sheet Template    by: MrStump
+-- D&D 5e Fillable Character, Details, and Spellcasting Sheet
+-- Author: Thor's Hammer
+-- Adapted from Character Sheet Template by: MrStump
 
-You can set up your own character sheet if you follow these steps.
+function onLoad(save_state)
+  -- Initialize helper and sheet control object
+  sheetHelper = getHelperClient('CHARACTER_SHEET_HELPER')
+  sheet = sheetHelper.initializeSheet({
+    SheetObj = self,
+    SavedData = save_state,
+    ControlData = defaultButtonData,
+    DisableSave = true,
+    ButtonColor = {0,0.8,0.8}
+  })
+end
 
-Step 1) Change the character sheet image
-    -Right click on the character sheet, click Custom
-    -Replace the image URL with one for your character sheet
-    -Click import, make sure your sheet loads
-    -SAVE THE GAME (the table setup)
-    -LOAD FROM THAT SAVE YOU JUST MADE
+-- Global vars
 
-Step 2) Edit script to fit your character sheet
-    -Below you will see some general options, and then the big data table
-    -The data table is what determines how many of which buttons are made
-        -Checkboxes
-        -Counters
-        -Textboxes
-    -By default, there are 3 of each. You can add more or remove entries
-    -If you intend to add/remove, be sure only to add/remove ENTRIES
-        -This is what an entry looks like:
-            {
-                pos   = {-0.977,0.1,-0.589},
-                size  = 800,
-                state = false
-            },
-        -Deleting the whole thing would remove that specific item on the sheet
-        -Copy and pasting it after another entry would create another
-    -Each entry type has unique data points (pos, size, state, etc)
-        -Do not try to add in your own data points or remove them individually
-        -There is a summary of what each point does at the top of its category
+skillThrowModMap = {
+  StrSavingThrow = 'Str',
+  DexSavingThrow = 'Dex',
+  ConSavingThrow = 'Con',
+  IntSavingThrow = 'Int',
+  WisSavingThrow = 'Wis',
+  ChaSavingThrow = 'Cha',
+  Athletics = 'Str',
+  Acrobatics = 'Dex',
+  SleightOfHand = 'Dex',
+  Stealth = 'Dex',
+  Arcana = 'Int',
+  History = 'Int',
+  Investigation = 'Int',
+  Nature = 'Int',
+  Religion = 'Int',
+  AnimalHandling = 'Wis',
+  Insight = 'Wis',
+  Medicine = 'Wis',
+  Perception = 'Wis',
+  Survival = 'Wis',
+  Deception = 'Cha',
+  Intimidation = 'Cha',
+  Performance = 'Cha',
+  Persuasion = 'Cha',
+}
 
-Step 3) Save and check script changes
-    -Hit Save & Apply in the script window to save your code
-    -You can edit your code as needed and Save+Apply as often as needed
-    -When you are finished, make disableSave = false below then Save+apply
-        -This enables saving, so your sheet will remember whats on it.
+-- Callback functions
 
-Bonus) Finding/Editing Positions for elements
-    I have included a tool to get positions for buttons in {x,y,z} form
-    Place it where you want the center of your element to be
-    Then copy the table from the notes (lower right of screen)
-        You can highlight it and CTRL+C
-    Paste it into the data table where needed (pos=)
-    If you want to manually tweek the values:
-        {0,0,0} is the center of the character sheet
-        {1,0,0} is right, {-1,0,0} is left
-        {0,0,-1} is up, {0,0,1} is down
-        0.1 for Y is the height off of the page.
-            If it was 0, it would be down inside the model of the sheet
+function changeLevel(params)
+  sheetHelper.updateLabel({
+    sheet = sheet,
+    value = params.data.value,
+    indexer = { 'HitDiceTotal' }
+  })
+end
 
-Begin editing below:    ]]
+function changeModifier(params)
+  local newVal = params.data.value
+  local modType = params.data.name
+  local mod = math.floor((newVal - 10) / 2)
+  sheetHelper.updateLabel({
+    sheet = sheet,
+    value = (mod >= 0 and '+' or '')..mod,
+    indexer = { 'AbilityModifiers', 'fields', modType..'AbilityMod' }
+  })
+  adjustSavingThrowsAndSkills(modType, mod)
+end
 
---Set this to true while editing and false when you have finished
-disableSave = false
---Remember to set this to false once you are done making changes
---Then, after you save & apply it, save your game too
+function toggleProficiency(params)
+  local stat = string.gsub(params.data.name, 'Prof', '')
+  adjustSavingThrowOrSkill(stat)
+end
 
---Color information for input text (r,g,b, values of 0-1)
-inputFontColor = {0,0,0}
---Color information for input background
-inputColor = {1,1,1}
---Color information for button text (r,g,b, values of 0-1)
-buttonFontColor = {0,0,0}
---Color information for button background
-buttonColor = {0,0.8,0.8}
---Change scale of button (Avoid changing if possible)
-buttonScale = {0.1,0.1,0.1}
+function changeProficiencyBonus(params)
+  adjustAllSavingThrowsAndSkills()
+end
+
+-- Other helper functions
+
+function adjustAllSavingThrowsAndSkills()
+  for stat, m in pairs(skillThrowModMap) do
+    adjustSavingThrowOrSkill(stat)
+  end
+end
+
+function adjustSavingThrowsAndSkills(modType)
+  for stat, m in pairs(skillThrowModMap) do
+    if m == modType then
+      adjustSavingThrowOrSkill(stat)
+    end
+  end
+end
+
+function adjustSavingThrowOrSkill(stat)
+  local sheetData = sheetHelper.getData(sheet)
+  local modType = skillThrowModMap[stat]
+  local mod = sheetData.label.AbilityModifiers.fields[modType..'AbilityMod']
+  local profActive = sheetData.checkbox.Proficiencies.fields[stat].state
+  local profVal = sheetData.counter.ProficiencyBonus.value
+  local val = tonumber(mod.value) + (profActive and profVal or 0)
+  sheetHelper.updateLabel({
+    sheet = sheet,
+    value = (val >= 0 and '+' or '')..val,
+    indexer = { 'SavingThrowsAndSkills', 'fields', stat }
+  })
+  sheetHelper.updateLabel({
+    sheet = sheet,
+    value = 10 + tonumber(val),
+    indexer = { 'PassiveSkills', 'fields', stat }
+  })
+end
 
 --This is the button placement information
   --[[
@@ -170,10 +213,10 @@ defaultButtonData = {
       fields = {
         Str = {-1.34,0.05,-1.09},
         Dex = {-1.34,0.05,-0.705},
-        Con= {-1.34,0.05,-0.320},
-        Int= {-1.34,0.05,0.065},
-        Wis= {-1.34,0.05,0.45},
-        Cha= {-1.34,0.05,0.835},
+        Con = {-1.34,0.05,-0.320},
+        Int = {-1.34,0.05,0.065},
+        Wis = {-1.34,0.05,0.45},
+        Cha = {-1.34,0.05,0.835},
       },
     },
     --End of counters
@@ -190,6 +233,7 @@ defaultButtonData = {
       alignment = Number to indicate how you want text aligned
                   (1=Automatic, 2=Left, 3=Center, 4=Right, 5=Justified)
       hideBG    = if background of counter is hidden (true=hidden, false=not)
+      sortOrder = the order in which you want the textboxes to be tabbed to
       func      = name of function that takes the index from this table,
                   the value, and whether it is currently selected
     ]]
@@ -200,6 +244,7 @@ defaultButtonData = {
       font_size = 550,
       label     = "Character Name",
       alignment = 3,
+      sortOrder = 1,
     },
     Overview = {
       rows      = 1,
@@ -210,26 +255,32 @@ defaultButtonData = {
         Class = {
           pos       = {0.05,0.05,-1.84},
           label     = "Class",
+          sortOrder = 2,
         },
         Background = {
           pos       = {0.6,0.05,-1.84},
           label     = "Background",
+          sortOrder = 3,
         },
         PlayerName = {
           pos       = {1.15,0.05,-1.84},
           label     = "Player Name",
+          sortOrder = 4,
         },
         Race = {
           pos       = {0.05,0.05,-1.7},
           label     = "Race",
+          sortOrder = 5,
         },
         Alignment = {
           pos       = {0.6,0.05,-1.7},
           label     = "Alignment",
+          sortOrder = 6,
         },
         XP = {
           pos       = {1.15,0.05,-1.7},
           label     = "XP",
+          sortOrder = 7,
         },
       },
     },
@@ -242,6 +293,7 @@ defaultButtonData = {
           font_size = 625,
           label     = "AC",
           alignment = 3,
+          sortOrder = 8,
         },
         Initiative = {
           pos       = {-0.017,0.05,-1.3},
@@ -250,6 +302,7 @@ defaultButtonData = {
           font_size = 625,
           label     = "Init",
           alignment = 3,
+          sortOrder = 9,
         },
         Speed = {
           pos       = {0.300,0.05,-1.3},
@@ -258,6 +311,7 @@ defaultButtonData = {
           font_size = 500,
           label     = "Spd",
           alignment = 3,
+          sortOrder = 10,
         },
       }
     },
@@ -271,14 +325,17 @@ defaultButtonData = {
           pos       = {0.14,0.05,-1.045},
           font_size = 400,
           label     = "Max HP",
+          sortOrder = 11,
         },
         CurrentHP = {
           pos       = {0.0,0.05,-0.9},
           label     = "Cur HP",
+          sortOrder = 12,
         },
         TemporaryHP = {
           pos       = {0.0,0.05,-0.625},
           label     = "Temp HP",
+          sortOrder = 13,
         },
       },
     },
@@ -288,7 +345,8 @@ defaultButtonData = {
       width     = 1500,
       font_size = 400,
       label     = "Cur Dice",
-      alignment = 3
+      alignment = 3,
+      sortOrder = 14,
     },
     Attacks = {
       rows      = 1,
@@ -299,9 +357,16 @@ defaultButtonData = {
         Attack1 = {
           pos = {-0.276,0.05,0.023},
           label = "Weapon1",
+          sortOrder = 15,
         },
-        Attack2 = {-0.276,0.05,0.133},
-        Attack3 = {-0.276,0.05,0.243},
+        Attack2 = {
+          pos = {-0.276,0.05,0.133},
+          sortOrder = 18,
+        },
+        Attack3 = {
+          pos = {-0.276,0.05,0.243},
+          sortOrder = 21,
+        },
       },
     },
     AttackBonuses = {
@@ -313,9 +378,16 @@ defaultButtonData = {
         AttackBonus1 = {
           pos = {0.005,0.05,0.023},
           label = "+0",
+          sortOrder = 16,
         },
-        AttackBonus2 = {0.005,0.05,0.133},
-        AttackBonus3 = {0.005,0.05,0.243},
+        AttackBonus2 = {
+          pos = {0.005,0.05,0.133},
+          sortOrder = 19,
+        },
+        AttackBonus3 = {
+          pos = {0.005,0.05,0.243},
+          sortOrder = 22,
+        },
       },
     },
     AttackDamages = {
@@ -327,9 +399,16 @@ defaultButtonData = {
         AttackDamage1 = {
           pos = {0.280,0.05,0.023},
           label = "1d8 + 1",
+          sortOrder = 17,
         },
-        AttackDamage2 = {0.280,0.05,0.133},
-        AttackDamage3 = {0.280,0.05,0.243},
+        AttackDamage2 = {
+          pos = {0.280,0.05,0.133},
+          sortOrder = 20,
+        },
+        AttackDamage3 = {
+          pos = {0.280,0.05,0.243},
+          sortOrder = 23,
+        },
       },
     },
     OtherAttacks = {
@@ -338,6 +417,7 @@ defaultButtonData = {
       width     = 4500,
       font_size = 500,
       alignment = 2,
+      sortOrder = 24,
     },
     OtherProficienciesAndLanguages = {
       pos       = {-1.02,0.05,1.59},
@@ -345,6 +425,7 @@ defaultButtonData = {
       width     = 4450,
       font_size = 550,
       alignment = 2,
+      sortOrder = 25,
     },
     Equipment = {
       rows      = 1,
@@ -355,41 +436,48 @@ defaultButtonData = {
         Copper = {
           pos       = {-0.335,0.05,1.14},
           label     = "CP",
+          sortOrder = 26,
         },
         Silver = {
           pos       = {-0.335,0.05,1.28},
           label     = "SP",
+          sortOrder = 27,
         },
         Electrum = {
           pos       = {-0.335,0.05,1.42},
           label     = "EP",
+          sortOrder = 28,
         },
         Gold = {
           pos       = {-0.335,0.05,1.56},
           label     = "GP",
+          sortOrder = 29,
         },
         Platinum = {
           pos       = {-0.335,0.05,1.70},
           label     = "PP",
+          sortOrder = 30,
         },
         Other = {
           pos       = {0.13,0.05,1.5},
           rows      = 9,
           width     = 3250,
           alignment = 2,
+          sortOrder = 31,
         }
       },
     },
     Personality = {
-      rows      = 5,
+      rows      = 4,
       width     = 4000,
       font_size = 250,
       alignment = 2,
+      sortOrder = 32,
       fields = {
-        Traits = {1.02,0.05,-1.26},
-        Ideals = {1.02,0.05,-0.92},
-        Bonds = {1.02,0.05,-0.62},
-        Flaws = {1.02,0.05,-0.32},
+        {1.02,0.05,-1.26},
+        {1.02,0.05,-0.92},
+        {1.02,0.05,-0.62},
+        {1.02,0.05,-0.32},
       },
     },
     FeaturesAndTraits = {
@@ -398,6 +486,7 @@ defaultButtonData = {
       width     = 4500,
       font_size = 500,
       alignment = 2,
+      sortOrder = 33,
     },
     --End of textboxes
   },
@@ -482,399 +571,30 @@ defaultButtonData = {
   },
 }
 
--- Global vars
-
-skillThrowModMap = {
-  StrSavingThrow = 'Str',
-  DexSavingThrow = 'Dex',
-  ConSavingThrow = 'Con',
-  IntSavingThrow = 'Int',
-  WisSavingThrow = 'Wis',
-  ChaSavingThrow = 'Cha',
-  Athletics = 'Str',
-  Acrobatics = 'Dex',
-  SleightOfHand = 'Dex',
-  Stealth = 'Dex',
-  Arcana = 'Int',
-  History = 'Int',
-  Investigation = 'Int',
-  Nature = 'Int',
-  Religion = 'Int',
-  AnimalHandling = 'Wis',
-  Insight = 'Wis',
-  Medicine = 'Wis',
-  Perception = 'Wis',
-  Survival = 'Wis',
-  Deception = 'Cha',
-  Intimidation = 'Cha',
-  Performance = 'Cha',
-  Persuasion = 'Cha',
-}
-
-
--- Control functions
-
-function changeLevel(controlData, amount)
-  local controlData = ref_buttonData.label.HitDiceTotal
-  if controlData then
-    updateLabel(controlData, controlData.value)
-  end
-end
-
-function changeModifier(controlData, amount)
-  local newVal = controlData.value
-  local modType = controlData.name
-  local controlData = ref_buttonData.label.AbilityModifiers.fields[modType..'AbilityMod']
-  if controlData then
-    local mod = math.floor((newVal - 10) / 2)
-    updateLabel(controlData, (mod >= 0 and '+' or '')..mod)
-    adjustSavingThrowsAndSkills(modType, mod)
-  end
-end
-
-function toggleProficiency(controlData)
-  local stat = string.gsub(controlData.name, 'Prof', '')
-  adjustSavingThrowOrSkill(stat)
-end
-
-function changeProficiencyBonus(controlData)
-  adjustAllSavingThrowsAndSkills()
-end
-
-function adjustAllSavingThrowsAndSkills()
-  for stat, m in pairs(skillThrowModMap) do
-    adjustSavingThrowOrSkill(stat)
-  end
-end
-
-function adjustSavingThrowsAndSkills(modType)
-  for stat, m in pairs(skillThrowModMap) do
-    if m == modType then
-      adjustSavingThrowOrSkill(stat)
-    end
-  end
-end
-
-function adjustSavingThrowOrSkill(stat)
-  local modType = skillThrowModMap[stat]
-  local mod = ref_buttonData.label.AbilityModifiers.fields[modType..'AbilityMod']
-  local profActive = ref_buttonData.checkbox.Proficiencies.fields[stat].state
-  local profVal = ref_buttonData.counter.ProficiencyBonus.value
-  local controlData = ref_buttonData.label.SavingThrowsAndSkills.fields[stat]
-  if controlData and mod then
-    local val = tonumber(mod.value) + (profActive and profVal or 0)
-    updateLabel(controlData, (val >= 0 and '+' or '')..val)
-    adjustPassive(controlData)
-  end
-end
-
-function adjustPassive(statControlData)
-  local controlData = ref_buttonData.label.PassiveSkills.fields[statControlData.name]
-  if controlData then
-    local val = 10 + tonumber(statControlData.value)
-    updateLabel(controlData, val)
-  end
-end
-
-
---Lua beyond this point, I recommend doing something more fun with your life
-
-
-
---Save function
-function updateSave()
-  saved_data = JSON.encode(ref_buttonData)
-  if disableSave==true then saved_data="" end
-  self.script_state = saved_data
-end
-
---Startup procedure
-function onload(saved_data)
-  if disableSave==true then saved_data="" end
-  if saved_data ~= "" then
-    local loaded_data = JSON.decode(saved_data)
-    ref_buttonData = loaded_data
-  else
-    ref_buttonData = defaultButtonData
-  end
-
-  spawnedButtonCount = 0
-  createCheckbox()
-  createCounter()
-  createTextbox()
-  createLabel()
-end
-
-
-
---Click functions for buttons
-
-
---Checks or unchecks the given box
-function click_checkbox(controlData)
-  if controlData.state == true then
-    controlData.state = false
-    self.editButton({ index = controlData.buttonIndex, label = "" })
-  else
-    controlData.state = true
-    self.editButton({ index = controlData.buttonIndex, label = string.char(10008) })
-  end
-  updateSave()
-end
-
---Applies value to given counter display
-function click_counter(controlData, amount)
-  controlData.value = controlData.value + amount
-  self.editButton({
-    index = controlData.buttonIndex,
-    label = controlData.value
-  })
-  updateSave()
-end
-
---Updates saved value for given text box
-function click_textbox(controlData, value, selected)
-  if selected == false then
-    controlData.value = value
-    updateSave()
-  end
-end
-
---Updates saved value for given label
-function updateLabel(controlData, value)
-  controlData.value = value
-  self.editButton({
-    index = controlData.buttonIndex,
-    label = value,
-  })
-  updateSave()
-end
-
---Dud function for if you have a background on a counter
-function click_none() end
-
-
---Button creation
-
-
---Makes checkboxes
-function createCheckbox()
-  for i, data in pairs(getControlData(ref_buttonData.checkbox, {})) do
-    --Sets up reference function
-    data.buttonIndex = spawnedButtonCount
-    local funcName = "checkbox"..i
-    local func = function()
-      click_checkbox(data)
-      if data.func and _G[data.func] then
-        _G[data.func](data)
-      end
-    end
-    self.setVar(funcName, func)
-    --Sets up label
-    local label = ""
-    if data.state == true then label = string.char(10008) end
-    --Creates button and counts it
-    self.createButton({
-      label = label,
-      click_function = funcName,
-      function_owner = self,
-      position = data.pos,
-      height = data.size,
-      width = data.size,
-      font_size = data.size,
-      scale = buttonScale,
-      color = buttonColor,
-      font_color = buttonFontColor
-    })
-    spawnedButtonCount = spawnedButtonCount + 1
-  end
-end
-
---Makes counters
-function createCounter()
-  for i, data in pairs(getControlData(ref_buttonData.counter, {})) do
-    --Sets up display
-    data.buttonIndex = spawnedButtonCount
-    --Sets up label
-    local label = data.value
-    --Sets height/width for display
-    local size = data.size
-    if data.hideBG == true then size = 0 end
-    --Creates button and counts it
-    self.createButton({
-      label = label,
-      click_function = "click_none",
-      function_owner = self,
-      position = data.pos,
-      height = size,
-      width = size,
-      font_size = data.size,
-      scale = buttonScale,
-      color = buttonColor,
-      font_color = buttonFontColor
-    })
-    spawnedButtonCount = spawnedButtonCount + 1
-
-    --Sets up add 1
-    local funcName = "counterAdd"..i
-    local func = function()
-      if not data.max or data.max >= data.value + 1 then
-        click_counter(data, 1)
-        if data.func and _G[data.func] then
-          _G[data.func](data, 1)
+-- Borrowed from TI4 mod: https://github.com/darrellanderson/TI4-TTS/blob/main/TI4/Helpers/TI4_UnitHelper.ttslua
+function getHelperClient(helperObjectName)
+    local function getHelperObject()
+        for _, object in ipairs(getAllObjects()) do
+            if object.getName() == helperObjectName then return object end
         end
-      end
+        error('missing object "' .. helperObjectName .. '"')
     end
-    self.setVar(funcName, func)
-    --Sets up label
-    local label = "+"
-    --Sets up position
-    local offsetDistance = (data.size/2 + data.size/4) * (buttonScale[1] * 0.002)
-    local pos = {data.pos[1] + offsetDistance, data.pos[2], data.pos[3]}
-    --Sets up size
-    local size = data.size / 2
-    --Creates button and counts it
-    self.createButton({
-      label = label,
-      click_function = funcName,
-      function_owner = self,
-      position = pos,
-      height = size,
-      width = size,
-      font_size = size,
-      scale = buttonScale,
-      color = buttonColor,
-      font_color = buttonFontColor
-    })
-    spawnedButtonCount = spawnedButtonCount + 1
-
-    --Sets up subtract 1
-    local funcName = "counterSub"..i
-    local func = function()
-      if not data.min or data.min <= data.value - 1 then
-        click_counter(data, -1)
-        if data.func and _G[data.func] then
-          _G[data.func](data, -1)
+    -- Nested tables are considered cross script.  Make a local copy.
+    local function copyTable(t)
+        if t and type(t) == 'table' then
+            local copy = {}
+            for k, v in pairs(t) do
+                copy[k] = type(v) == 'table' and copyTable(v) or v
+            end
+            t = copy
         end
-      end
+        return t
     end
-    self.setVar(funcName, func)
-    --Sets up label
-    local label = "-"
-    --Set up position
-    local pos = {data.pos[1] - offsetDistance, data.pos[2], data.pos[3]}
-    --Creates button and counts it
-    self.createButton({
-      label = label,
-      click_function = funcName,
-      function_owner = self,
-      position = pos,
-      height = size,
-      width = size,
-      font_size = size,
-      scale = buttonScale,
-      color = buttonColor,
-      font_color = buttonFontColor
-    })
-    spawnedButtonCount = spawnedButtonCount + 1
-  end
-end
-
-function createTextbox()
-  for i, data in pairs(getControlData(ref_buttonData.textbox, {})) do
-    --Sets up reference function
-    local funcName = "textbox"..i
-    local func = function(_,_,val,sel)
-      click_textbox(data, val, sel)
-      if data.func and _G[data.func] then
-        _G[data.func](data, val, sel)
-      end
+    local helperObject = false
+    local function getCallWrapper(functionName)
+        helperObject = helperObject or getHelperObject()
+        if not helperObject.getVar(functionName) then error('missing ' .. helperObjectName .. '.' .. functionName) end
+        return function(parameters) return copyTable(helperObject.call(functionName, parameters)) end
     end
-    self.setVar(funcName, func)
-
-    local bgColor = { inputColor[1], inputColor[2], inputColor[3] }
-    local fontColor = { inputFontColor[1], inputFontColor[2], inputFontColor[3] }
-    if data.hideBG then
-      table.insert(bgColor, 0)
-      table.insert(fontColor, 255)
-    end
-    self.createInput({
-      input_function = funcName,
-      function_owner = self,
-      label          = data.label or "",
-      alignment      = data.alignment,
-      position       = data.pos,
-      scale          = buttonScale,
-      width          = data.width,
-      height         = (data.font_size*data.rows)+24,
-      font_size      = data.font_size,
-      color          = bgColor,
-      font_color     = fontColor,
-      value          = data.value or "",
-    })
-  end
-end
-
-function createLabel()
-  for i, data in pairs(getControlData(ref_buttonData.label, {})) do
-    data.buttonIndex = spawnedButtonCount
-    local bgColor = { inputColor[1], inputColor[2], inputColor[3] }
-    local fontColor = { inputFontColor[1], inputFontColor[2], inputFontColor[3] }
-    if data.hideBG then
-      table.insert(bgColor, 0)
-      table.insert(fontColor, 255)
-    end
-    self.createButton({
-      click_function = 'noop',
-      function_owner = self,
-      label          = data.value,
-      position       = data.pos,
-      scale          = buttonScale,
-      width          = data.width,
-      height         = (data.font_size*data.rows)+24,
-      font_size      = data.font_size,
-      color          = bgColor,
-      font_color     = fontColor,
-    })
-    spawnedButtonCount = spawnedButtonCount + 1
-  end
-end
-
-function getControlData(items, defaultAttrs)
-  local controls = {}
-
-  if items ~= nil then
-    for key, item in pairs(items) do
-      if item.fields ~= nil then
-        local children = getControlData(item.fields, item)
-        for _, c in pairs(children) do
-          table.insert(controls, c)
-        end
-      else
-        local result = {}
-        for k, v in pairs(defaultAttrs) do
-          if k ~= 'fields' then
-            result[k] = v
-          end
-        end
-
-        if item.pos ~= nil then
-          for k, v in pairs(item) do
-            result[k] = v
-          end
-        else
-          result.pos = item
-        end
-
-        result.name = key
-        items[key] = result
-        table.insert(controls, result)
-      end
-    end
-  end
-
-  return controls
-end
-
-function noop()
+    return setmetatable({}, { __index = function(t, k) return getCallWrapper(k) end })
 end

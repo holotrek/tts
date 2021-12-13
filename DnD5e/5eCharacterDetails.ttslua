@@ -136,36 +136,34 @@ defaultButtonData = {
         Class = {
           pos       = {0.05,0.05,-1.823},
           label     = "Age",
+          sortOrder = 1,
         },
         Background = {
           pos       = {0.6,0.05,-1.823},
           label     = "Height",
+          sortOrder = 2,
         },
         PlayerName = {
           pos       = {1.15,0.05,-1.823},
           label     = "Weight",
+          sortOrder = 3,
         },
         Race = {
           pos       = {0.05,0.05,-1.683},
           label     = "Eyes",
+          sortOrder = 4,
         },
         Alignment = {
           pos       = {0.6,0.05,-1.683},
           label     = "Skin",
+          sortOrder = 5,
         },
         XP = {
           pos       = {1.15,0.05,-1.683},
           label     = "Hair",
+          sortOrder = 6,
         },
       },
-    },
-    Backstory = {
-      pos       = {-1.02,0.05,0.95},
-      rows      = 19,
-      width     = 4450,
-      font_size = 500,
-      label     = "Character Backstory",
-      alignment = 2,
     },
     AlliesAndOrganizations = {
       pos       = {0.024,0.05,-0.85},
@@ -174,6 +172,7 @@ defaultButtonData = {
       font_size = 400,
       label     = "Allies & Organizations",
       alignment = 2,
+      sortOrder = 7,
     },
     SymbolName = {
       pos       = {1.0,0.05,-1.265},
@@ -182,12 +181,23 @@ defaultButtonData = {
       font_size = 400,
       label     = "Symbol Name",
       alignment = 3,
+      sortOrder = 8,
+    },
+    Backstory = {
+      pos       = {-1.02,0.05,0.95},
+      rows      = 19,
+      width     = 4450,
+      font_size = 500,
+      label     = "Character Backstory",
+      alignment = 2,
+      sortOrder = 9,
     },
     FeaturesAndTraits = {
       rows      = 13,
       width     = 4600,
       font_size = 400,
       alignment = 2,
+      sortOrder = 10,
       fields = {
         Column1 = {
           pos       = {0.024,0.05,0.45},
@@ -201,6 +211,7 @@ defaultButtonData = {
       width     = 4600,
       font_size = 400,
       alignment = 2,
+      sortOrder = 11,
       fields = {
         Column1 = {
           pos       = {0.024,0.05,1.52},
@@ -470,7 +481,11 @@ function createCounter()
 end
 
 function createTextbox()
-  for i, data in pairs(getControlData(ref_buttonData.textbox, {})) do
+  local allControls = getControlData(ref_buttonData.textbox, {})
+  table.sort(allControls, function(a, b)
+    return (a.sortOrder or 0) < (b.sortOrder or 0)
+  end)
+  for i, data in pairs(allControls) do
     --Sets up reference function
     local funcName = "textbox"..i
     local func = function(_,_,val,sel)
