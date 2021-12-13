@@ -42,7 +42,7 @@ function loadMainSheetData()
     label = {},
   }
   for _, s in ipairs(self.getStates()) do
-    if s.id < self.getStateId() then
+    if s.name == 'D&D 5e Character Sheet' then
       local json = s.lua_script_state
       if json ~= '' then
         mainSheetData = JSON.decode(json)
