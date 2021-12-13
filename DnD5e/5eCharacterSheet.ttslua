@@ -9,7 +9,7 @@ function onLoad(save_state)
     SheetObj = self,
     SavedData = save_state,
     ControlData = defaultButtonData,
-    DisableSave = true,
+    DisableSave = false,
     ButtonColor = {0,0.8,0.8}
   })
 end
