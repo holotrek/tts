@@ -4,7 +4,7 @@
 
 function onLoad(save_state)
   -- Initialize helper and sheet control object
-  sheetHelper = getJointedHelperClient('CHARACTER_SHEET_HELPER')
+  sheetHelper = getHelperClient('CHARACTER_SHEET_HELPER')
   sheet = sheetHelper.initializeSheet({
     SheetObj = self,
     SavedData = save_state,

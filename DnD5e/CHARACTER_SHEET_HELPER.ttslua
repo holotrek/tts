@@ -3,15 +3,6 @@
 -- Adapted from Character Sheet Template by: MrStump
 
 sheets = {}
-function onLoad(save_state)
-  self.createButton({
-    click_function = '_click_none',
-    function_owner = self,
-    label          = 'Main Sheet Script\n\nDO NOT DELETE',
-    position       = {0,0.1,0},
-    scale          = {2,2,2},
-  })
-end
 
 -- Public functions
 
