@@ -1,0 +1,157 @@
+effect_bags = {}
+figurinesConfigured = {}
+
+function onLoad(save_state)
+  figurinesConfigured = JSON.decode(save_state) or {}
+  Wait.frames(function()
+    for _, o in pairs(self.getObjects()) do
+      if o.tags[1] == 'Infinite' then
+        effect_bags[o.name] = o.guid
+      end
+    end
+
+    for _, g in pairs(figurinesConfigured) do
+      local mini = getObjectFromGUID(g)
+      if mini ~= nil then
+        configureMenus(mini)
+      end
+    end
+  end, 10)
+end
+
+function onSave()
+  return JSON.encode(figurinesConfigured)
+end
+
+function onObjectEnterContainer(container, enter_object)
+  if container == self and enter_object.type == 'Figurine' then
+    local newPos = container.getPosition()
+    newPos = { newPos.x, newPos.y, newPos.z - 3 }
+    container.takeObject({
+      position          = newPos,
+      guid              = enter_object.guid
+    })
+
+    local mini = getObjectFromGUID(enter_object.guid)
+    configureMenus(mini)
+    table.insert(figurinesConfigured, #figurinesConfigured+1, mini.getGUID())
+  end
+end
+
+function configureMenus(mini)
+  local sortedKeys = {}
+  for n in pairs(effect_bags) do table.insert(sortedKeys, n) end
+  table.sort(sortedKeys)
+  mini.clearContextMenu()
+  for _, effect in ipairs(sortedKeys) do
+    local originalName = mini.getName()
+    local ms = mini.getScale()
+    local scaleRatio = { x = 0.18 / ms.x, y = 0.18 / ms.y, z = 0.18 / ms.z }
+    mini.addContextMenuItem(effect, function()
+      toggleEffect(mini, effect, originalName, scaleRatio)
+    end, true)
+  end
+  setupHideToggle(mini)
+  printToAll(mini.getName()..' configured with effects menu (right-click to use)', {0,.5,0})
+end
+
+function setupHideToggle(mini)
+  local hiddenTint = 'Grey'
+  local tagName = 'Hidden'
+  local menuText = 'Toggle Hidden'
+  mini.addContextMenuItem(menuText, function()
+    local doHide = true
+    if mini.hasTag(tagName) then
+      menuText = 'Show to Players'
+      doHide = false
+    end
+    mini.attachInvisibleHider('hideMiniToAll', doHide, {'Grey','White','Brown','Red','Orange','Yellow','Green','Teal','Blue','Purple','Pink'})
+    local miniName = mini.getName()
+    if miniName == '' then
+      miniName = 'Figurine'
+    end
+    if doHide then
+      mini.addTag(tagName)
+      mini.setColorTint(hiddenTint)
+      printToAll(miniName..' hidden from players')
+    else
+      mini.removeTag(tagName)
+      mini.setColorTint('White')
+      printToAll(miniName..' shown to players')
+    end
+  end)
+end
+
+function toggleEffect(mini, effectName, originalMiniName, scaleRatio)
+  local attachmentIndex = getAttachmentIndex(mini, effectName)
+  if attachmentIndex > -1 then
+    local remainingAttachments = {}
+    for i, a in ipairs(mini.getAttachments()) do
+      if a.name != effectName then
+        remainingAttachments[a.name] = a.name
+      end
+    end
+    mini.destroyAttachments()
+    mini.setName(originalMiniName)
+
+    local frames = 1
+    for _, en in pairs(remainingAttachments) do
+      Wait.frames(function ()
+        addAttachmentSet(mini, en, originalMiniName, scaleRatio)
+      end, frames)
+      frames = frames + 1
+    end
+  else
+    addAttachmentSet(mini, effectName, originalMiniName, scaleRatio)
+  end
+end
+
+function addAttachmentSet(mini, effectName, originalMiniName, scaleRatio)
+  local bounds = mini.getBounds()
+  local pos = mini.getPosition()
+  local hasAttachments = #mini.getAttachments() > 0
+
+  if not hasAttachments then
+    mini.setName(originalMiniName..' - '..effectName)
+  else
+    mini.setName(mini.getName()..', '..effectName)
+  end
+
+  local bagPos = self.getPosition()
+  bagPos.y = bagPos.y + 2
+  local tokenBag = self.takeObject({
+    position          = bagPos,
+    smooth            = false,
+    guid              = effect_bags[effectName],
+  })
+  addAttachment(mini, effectName, tokenBag, bounds, pos, scaleRatio, 1)
+  addAttachment(mini, effectName, tokenBag, bounds, pos, scaleRatio, -1)
+end
+
+function addAttachment(mini, effectName, tokenBag, bounds, originalPos, scaleRatio, offset)
+  local pos = {
+    originalPos.x + 0.1 * offset,
+    originalPos.y + bounds.size.y + 0.3,
+    originalPos.z + 0.1 * offset
+  }
+  local token = tokenBag.takeObject({
+    position          = pos,
+    rotation          = {90, 45 * offset, 90},
+    smooth            = false,
+    index             = 1
+  })
+  local ms = mini.getScale()
+  token.setScale({ms.x * scaleRatio.x, ms.y * scaleRatio.y, ms.z * scaleRatio.z})
+  token.setLock(true)
+  mini.addAttachment(token)
+end
+
+function getAttachmentIndex(mini, effectName)
+  local attachmentIndex = -1
+  for i, a in ipairs(mini.getAttachments()) do
+    if a.name == effectName then
+      attachmentIndex = a.index
+    end
+  end
+  return attachmentIndex
+end
