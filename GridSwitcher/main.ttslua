@@ -3,6 +3,10 @@ currentGridName = ''
 toolBtnCount = 0
 maxButtons = 36
 disableSave = false
+saveButtonIdx = -1
+deleteButtonIdx = -1
+clearButtonIdx = -1
+clearConfirmation = false
 
 function onLoad(save_state)
   data = JSON.decode(save_state) or {
@@ -51,6 +55,7 @@ function createToolControls()
     position       = {-.75,0.1,-1},
     width          = 750,
   })
+  saveButtonIdx = 0
   self.createButton({
     click_function = 'deleteGrid',
     function_owner = self,
@@ -58,16 +63,36 @@ function createToolControls()
     position       = {.75,0.1,-1},
     width          = 750,
   })
+  deleteButtonIdx = 1
+  self.createButton({
+    click_function = 'clearGrids',
+    function_owner = self,
+    label          = 'Clear All Grids',
+    position       = {1.25,0.1,-1.75},
+    width          = 1000,
+    scale          = {.5,.5,.5},
+    hover_color    = 'Red'
+  })
+  clearButtonIdx = 2
   toolBtnCount = #self.getButtons()
 end
 
 function setGridName(obj, player_clicker_color, input_value, selected)
   local saveButtonLabel = 'Save New Grid'
+  if string.len(input_value) > 30 then
+    input_value = string.sub(input_value, 1, 30)
+    Wait.frames(function()
+      self.editInput({
+        index = 0,
+        value = input_value
+      })
+    end, 1)
+  end
   if data.grids[input_value] ~= nil then
     saveButtonLabel = 'Overwrite Grid'
   end
   self.editButton({
-    index          = 0,
+    index          = saveButtonIdx,
     label          = saveButtonLabel,
   })
   currentGridName = input_value
@@ -122,6 +147,8 @@ function addGridButton(gridName)
   local func = function()
     restoreGrid(gridName)
   end
+  local lettersOverLimit = string.len(gridName) - 12
+  local fontSize = 100 - math.min(50, 5 * lettersOverLimit)
   self.setVar(funcName, func)
   self.createButton({
     click_function = funcName,
@@ -129,7 +156,7 @@ function addGridButton(gridName)
     label          = gridName,
     position       = {-1.25 + (1.25 * col), 0.1, -.7 + (.2 * row)},
     width          = 750,
-    font_size      = 100,
+    font_size       = fontSize,
     height         = 150,
     scale          = {.75,.75,.75}
   })
@@ -169,6 +196,33 @@ function deleteGrid()
   Wait.frames(function()
     renderAllButtons()
   end, 5)
+end
+
+function clearGrids(obj, player_clicker_color)
+  if clearConfirmation then
+    deleteAllButtons()
+    resetClearButton()
+  else
+    self.editButton({
+      index          = clearButtonIdx,
+      label          = 'Are you sure!?',
+      color          = 'Red',
+      hover_color    = {.5,0,0},
+    })
+    clearConfirmation = true
+    broadcastToColor('Click again to confirm. Resetting confirmation in 5 seconds.', player_clicker_color, 'Red')
+    Wait.time(resetClearButton, 5)
+  end
+end
+
+function resetClearButton()
+  self.editButton({
+    index          = clearButtonIdx,
+    label          = 'Clear All Grids',
+    color          = 'White',
+    hover_color    = 'White',
+  })
+  clearConfirmation = false
 end
 
 function noop()
