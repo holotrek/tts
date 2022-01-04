@@ -78,6 +78,7 @@ function createToolControls()
     hover_color    = 'Red'
   })
   clearButtonIdx = 2
+  resetButtonStates()
   toolBtnCount = #self.getButtons()
 end
 
@@ -95,11 +96,36 @@ function setGridName(obj, player_clicker_color, input_value, selected)
   if data.grids[input_value] ~= nil then
     saveButtonLabel = 'Overwrite Grid'
   end
+  currentGridName = input_value
+  resetButtonStates()
+end
+
+function resetInput()
+  currentGridName = ''
+  self.editInput({
+    index          = 0,
+    value          = '',
+  })
+end
+
+function resetButtonStates()
+  local saveButtonLabel = 'Save New Grid'
+  local deleteButtonLabel = '---'
+  local deleteButtonColor = 'Grey'
+  if data.grids[currentGridName] ~= nil then
+    saveButtonLabel = 'Overwrite Grid'
+    deleteButtonLabel = 'Delete Grid'
+    deleteButtonColor = 'White'
+  end
   self.editButton({
     index          = saveButtonIdx,
     label          = saveButtonLabel,
   })
-  currentGridName = input_value
+  self.editButton({
+    index          = deleteButtonIdx,
+    label          = deleteButtonLabel,
+    color          = deleteButtonColor,
+  })
 end
 
 function saveGrid(obj, player_clicker_color, alt_click)
@@ -110,7 +136,6 @@ function saveGrid(obj, player_clicker_color, alt_click)
   if data.grids[currentGridName] ~= nil then
     isNew = false
   end
-  table.insert(data.order, currentGridName)
   data.grids[currentGridName] = {
     type = Grid.type,
     show_lines = Grid.show_lines,
@@ -124,8 +149,11 @@ function saveGrid(obj, player_clicker_color, alt_click)
     sizeY = Grid.sizeY,
   }
   if isNew then
+    table.insert(data.order, currentGridName)
     addGridButton(currentGridName)
   end
+  resetInput()
+  resetButtonStates()
 end
 
 function restoreGrid(gridName)
@@ -164,10 +192,6 @@ function addGridButton(gridName)
     height         = 150,
     scale          = {.75,.75,.75}
   })
-  self.editInput({
-    index          = 0,
-    value          = '',
-  })
   checkMaxButtons()
 end
 
@@ -196,6 +220,8 @@ function deleteGrid()
   if idx > -1 then
     table.remove(data.order, idx)
   end
+  resetInput()
+  resetButtonStates()
   deleteAllButtons()
   Wait.frames(function()
     renderAllButtons()
