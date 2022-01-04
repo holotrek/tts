@@ -1,0 +1,175 @@
+data = {}
+currentGridName = ''
+toolBtnCount = 0
+maxButtons = 36
+disableSave = false
+
+function onLoad(save_state)
+  data = JSON.decode(save_state) or {
+    grids = {},
+    order = {}
+  }
+  createToolControls()
+  renderAllButtons()
+end
+
+function onSave()
+  if disableSave then
+    return ''
+  end
+  return JSON.encode(data)
+end
+
+function deleteAllButtons()
+  for _, b in ipairs(self.getButtons()) do
+    if b.index >= toolBtnCount then
+      self.removeButton(b.index)
+    end
+  end
+end
+
+function renderAllButtons()
+  for _, g in ipairs(data.order) do
+    addGridButton(g)
+  end
+end
+
+function createToolControls()
+  self.createInput({
+    input_function = 'setGridName',
+    function_owner = self,
+    label          = 'Enter Grid Name',
+    alignment      = 3,
+    position       = {0,0.1,-1.35},
+    width          = 1500,
+    height         = 124,
+  })
+  self.createButton({
+    click_function = 'saveGrid',
+    function_owner = self,
+    label          = 'Save New Grid',
+    position       = {-.75,0.1,-1},
+    width          = 750,
+  })
+  self.createButton({
+    click_function = 'deleteGrid',
+    function_owner = self,
+    label          = 'Delete Grid',
+    position       = {.75,0.1,-1},
+    width          = 750,
+  })
+  toolBtnCount = #self.getButtons()
+end
+
+function setGridName(obj, player_clicker_color, input_value, selected)
+  local saveButtonLabel = 'Save New Grid'
+  if data.grids[input_value] ~= nil then
+    saveButtonLabel = 'Overwrite Grid'
+  end
+  self.editButton({
+    index          = 0,
+    label          = saveButtonLabel,
+  })
+  currentGridName = input_value
+end
+
+function saveGrid(obj, player_clicker_color, alt_click)
+  if currentGridName == '' then
+    return
+  end
+  local isNew = true
+  if data.grids[currentGridName] ~= nil then
+    isNew = false
+  end
+  table.insert(data.order, currentGridName)
+  data.grids[currentGridName] = {
+    type = Grid.type,
+    show_lines = Grid.show_lines,
+    color = Grid.color,
+    opacity = Grid.opacity,
+    thick_lines = Grid.thick_lines,
+    snapping = Grid.snapping,
+    offsetX = Grid.offsetX,
+    offsetY = Grid.offsetY,
+    sizeX = Grid.sizeX,
+    sizeY = Grid.sizeY,
+  }
+  if isNew then
+    addGridButton(currentGridName)
+  end
+end
+
+function restoreGrid(gridName)
+  local gridData = data.grids[gridName]
+  Grid.type = gridData.type
+  Grid.show_lines = gridData.show_lines
+  Grid.color = gridData.color
+  Grid.opacity = gridData.opacity
+  Grid.thick_lines = gridData.thick_lines
+  Grid.snapping = gridData.snapping
+  Grid.offsetX = gridData.offsetX
+  Grid.offsetY = gridData.offsetY
+  Grid.sizeX = gridData.sizeX
+  Grid.sizeY = gridData.sizeY
+end
+
+function addGridButton(gridName)
+  local buttonCount = #self.getButtons()
+  local posPerc = (buttonCount - toolBtnCount) / 12
+  local col, rowMod = math.modf(posPerc)
+  local row = rowMod * 12
+  local funcName = '_restoreGrid'..buttonCount
+  local func = function()
+    restoreGrid(gridName)
+  end
+  self.setVar(funcName, func)
+  self.createButton({
+    click_function = funcName,
+    function_owner = self,
+    label          = gridName,
+    position       = {-1.25 + (1.25 * col), 0.1, -.7 + (.2 * row)},
+    width          = 750,
+    font_size      = 100,
+    height         = 150,
+    scale          = {.75,.75,.75}
+  })
+  self.editInput({
+    index          = 0,
+    value          = '',
+  })
+  checkMaxButtons()
+end
+
+function checkMaxButtons()
+  if (#self.getButtons() - toolBtnCount) >= maxButtons then
+    self.editButton({
+      index          = 0,
+      click_function = 'noop',
+      function_owner = self,
+      label          = 'MAX GRIDS REACHED',
+    })
+  end
+end
+
+function deleteGrid()
+  if data.grids[currentGridName] == nil then
+    return
+  end
+  data.grids[currentGridName] = nil
+  local idx = -1
+  for i, g in ipairs(data.order) do
+    if g == currentGridName then
+      idx = i
+    end
+  end
+  if idx > -1 then
+    table.remove(data.order, idx)
+  end
+  deleteAllButtons()
+  Wait.frames(function()
+    renderAllButtons()
+  end, 5)
+end
+
+function noop()
+end
