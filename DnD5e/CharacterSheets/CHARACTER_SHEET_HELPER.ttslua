@@ -45,6 +45,7 @@ function initializeSheet(params)
   _createCheckbox(sheet)
   _createCounter(sheet)
   _createTextbox(sheet)
+  _createSelect(sheet)
   _createLabel(sheet)
   return sheet
 end
@@ -118,6 +119,22 @@ function _click_textbox(sheet, controlData, value, selected)
     controlData.value = value
     _updateSave(sheet)
   end
+end
+
+--Updates saved value for given select control
+function _click_select(sheet, controlData)
+  local opts = controlData.options
+  local nextIdx = controlData.index + 1
+  if nextIdx > #opts then
+    nextIdx = 1
+  end
+  controlData.value = opts[nextIdx]
+  controlData.index = nextIdx
+  sheet.Object.editButton({
+    index = controlData.buttonIndex,
+    label = controlData.value
+  })
+  _updateSave(sheet)
 end
 
 --Dud function for if you have a background on a counter
@@ -289,6 +306,50 @@ function _createTextbox(sheet)
   end
 end
 
+function _createSelect(sheet)
+  for i, data in pairs(_getControlData(getData(sheet).select, {})) do
+    data.buttonIndex = sheet.SpawnedButtonCount
+    --Defaults current shown value to placeholder if nothing selected
+    local label = data.value
+    if data.index == nil then
+      data.index = 0
+    end
+    if data.index == 0 then
+      label = data.label or 'Click to Select'
+    end
+    --Sets up reference function
+    local funcName = sheet.Object.getGUID().."_select"..i
+    local func = function(_,_,val)
+      _click_select(sheet, data)
+      if data.func then
+        sheet.Object.call(data.func, { data = data })
+      end
+    end
+    self.setVar(funcName, func)
+
+    local bgColor = { sheet.ButtonColor[1], sheet.ButtonColor[2], sheet.ButtonColor[3] }
+    local fontColor = { sheet.ButtonFontColor[1], sheet.ButtonFontColor[2], sheet.ButtonFontColor[3] }
+    if data.hideBG then
+      table.insert(bgColor, 0)
+      table.insert(fontColor, 255)
+    end
+    --Creates button and counts it
+    sheet.Object.createButton({
+      click_function = funcName,
+      function_owner = self,
+      label          = label,
+      position       = data.pos,
+      scale          = sheet.ButtonScale,
+      width          = data.width,
+      height         = data.font_size+24,
+      font_size      = data.font_size,
+      color          = bgColor,
+      font_color     = fontColor,
+    })
+    sheet.SpawnedButtonCount = sheet.SpawnedButtonCount + 1
+  end
+end
+
 function _createLabel(sheet)
   for i, data in pairs(_getControlData(getData(sheet).label, {})) do
     data.buttonIndex = sheet.SpawnedButtonCount
@@ -298,6 +359,7 @@ function _createLabel(sheet)
       table.insert(bgColor, 0)
       table.insert(fontColor, 255)
     end
+    --Creates button and counts it
     sheet.Object.createButton({
       click_function = '_click_none',
       function_owner = self,

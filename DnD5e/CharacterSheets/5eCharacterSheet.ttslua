@@ -227,7 +227,7 @@ defaultButtonData = {
       pos       = the position (pasted from the helper tool)
       rows      = how many lines of text you want for this box
       width     = how wide the text box is
-      font_size = size of text. This and "rows" effect overall height
+      font_size = size of text. This and "rows" affect overall height
       label     = what is shown when there is no text. "" = nothing
       value     = text entered into box. "" = nothing
       alignment = Number to indicate how you want text aligned
@@ -252,11 +252,6 @@ defaultButtonData = {
       font_size = 400,
       alignment = 2,
       fields = {
-        Class = {
-          pos       = {0.05,0.05,-1.84},
-          label     = "Class",
-          sortOrder = 2,
-        },
         Background = {
           pos       = {0.6,0.05,-1.84},
           label     = "Background",
@@ -490,15 +485,39 @@ defaultButtonData = {
     },
     --End of textboxes
   },
+  --Add selects
+  select = {
+    --[[
+      name      = unique name of the select
+      pos       = the position (pasted from the helper tool)
+      width     = how wide the text box is
+      font_size = size of text. This affects overall height
+      hideBG    = if background of select is hidden (true=hidden, false=not)
+      label     = placeholder to show when no value is selected
+      options   = the options available to select from
+      value     = text shown
+    ]]
+    Overview = {
+      width     = 2250,
+      font_size = 400,
+      alignment = 2,
+      fields = {
+        Class = {
+          pos       = {0.05,0.05,-1.84},
+          label     = "Class",
+          options   = {'Barbarian','Bard','Cleric','Druid','Fighter','Monk','Paladin','Ranger','Rogue','Sorceror','Warlock','Wizard'}
+        },
+      },
+    },
+  },
   --Add noneditable labels
   label = {
     --[[
       name      = unique name of the label
       pos       = the position (pasted from the helper tool)
-      rows      = how many lines of text you want for this box
-      width     = how wide the text box is
-      font_size = size of text. This and "rows" effect overall height
-      hideBG    = if background of counter is hidden (true=hidden, false=not)
+      width     = how wide the label is
+      font_size = size of text. This and "rows" affect overall height
+      hideBG    = if background of label is hidden (true=hidden, false=not)
       value     = text shown
     ]]
     AbilityModifiers = {
