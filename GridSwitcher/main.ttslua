@@ -9,10 +9,7 @@ clearButtonIdx = -1
 clearConfirmation = false
 
 function onLoad(save_state)
-  data = JSON.decode(save_state) or {
-    grids = {},
-    order = {}
-  }
+  initializeGridObj(JSON.decode(save_state))
   createToolControls()
   renderAllButtons()
 end
@@ -22,6 +19,13 @@ function onSave()
     return ''
   end
   return JSON.encode(data)
+end
+
+function initializeGridObj(obj)
+  data = obj or {
+    grids = {},
+    order = {}
+  }
 end
 
 function deleteAllButtons()
@@ -202,6 +206,7 @@ function clearGrids(obj, player_clicker_color)
   if clearConfirmation then
     deleteAllButtons()
     resetClearButton()
+    initializeGridObj()
   else
     self.editButton({
       index          = clearButtonIdx,
