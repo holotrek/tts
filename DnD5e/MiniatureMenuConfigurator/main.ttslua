@@ -56,7 +56,6 @@ function configureMenus(mini)
 end
 
 function setupHideToggle(mini)
-  local hiddenTint = 'Grey'
   local tagName = 'Hidden'
   local menuText = 'Toggle Hidden'
   mini.addContextMenuItem(menuText, function()
@@ -72,11 +71,9 @@ function setupHideToggle(mini)
     end
     if doHide then
       mini.addTag(tagName)
-      mini.setColorTint(hiddenTint)
       printToAll(miniName..' hidden from players')
     else
       mini.removeTag(tagName)
-      mini.setColorTint('White')
       printToAll(miniName..' shown to players')
     end
   end)
