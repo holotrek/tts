@@ -13,7 +13,7 @@ function onLoad(save_state)
     for _, g in pairs(figurinesConfigured) do
       local mini = getObjectFromGUID(g)
       if mini ~= nil then
-        configureMenus(mini)
+        configureMenus(mini, false)
       end
     end
   end, 10)
@@ -21,6 +21,14 @@ end
 
 function onSave()
   return JSON.encode(figurinesConfigured)
+end
+
+function onObjectSpawn(object)
+  for _, g in pairs(figurinesConfigured) do
+    if g == object.guid then
+      configureMenus(object, false)
+    end
+  end
 end
 
 function onObjectEnterContainer(container, enter_object)
@@ -33,12 +41,12 @@ function onObjectEnterContainer(container, enter_object)
     })
 
     local mini = getObjectFromGUID(enter_object.guid)
-    configureMenus(mini)
+    configureMenus(mini, true)
     table.insert(figurinesConfigured, #figurinesConfigured+1, mini.getGUID())
   end
 end
 
-function configureMenus(mini)
+function configureMenus(mini, showMessage)
   local sortedKeys = {}
   for n in pairs(effect_bags) do table.insert(sortedKeys, n) end
   table.sort(sortedKeys)
@@ -52,7 +60,9 @@ function configureMenus(mini)
     end, true)
   end
   setupHideToggle(mini)
-  printToAll(mini.getName()..' configured with effects menu (right-click to use)', {0,.5,0})
+  if showMessage then
+    printToAll(mini.getName()..' configured with effects menu (right-click to use)', {0,.5,0})
+  end
 end
 
 function setupHideToggle(mini)
