@@ -14,6 +14,7 @@ function onLoad(save_state)
       local mini = getObjectFromGUID(g)
       if mini ~= nil then
         configureMenus(mini, false)
+        setHidden(mini, isHidden(mini), false)
       end
     end
   end, 10)
@@ -27,12 +28,13 @@ function onObjectSpawn(object)
   for _, g in pairs(figurinesConfigured) do
     if g == object.guid then
       configureMenus(object, false)
+      setHidden(object, isHidden(object), false)
     end
   end
 end
 
 function onObjectEnterContainer(container, enter_object)
-  if container == self and enter_object.type == 'Figurine' then
+  if container == self and (enter_object.type == 'Figurine' or enter_object.type == 'rpgFigurine') then
     local newPos = container.getPosition()
     newPos = { newPos.x, newPos.y, newPos.z - 3 }
     container.takeObject({
@@ -66,27 +68,38 @@ function configureMenus(mini, showMessage)
 end
 
 function setupHideToggle(mini)
-  local tagName = 'Hidden'
-  local menuText = 'Toggle Hidden'
-  mini.addContextMenuItem(menuText, function()
+  mini.addContextMenuItem('Toggle Hidden', function()
     local doHide = true
-    if mini.hasTag(tagName) then
-      menuText = 'Show to Players'
+    if isHidden(mini) then
       doHide = false
     end
-    mini.attachInvisibleHider('hideMiniToAll', doHide, {'Grey','White','Brown','Red','Orange','Yellow','Green','Teal','Blue','Purple','Pink'})
-    local miniName = mini.getName()
-    if miniName == '' then
-      miniName = 'Figurine'
-    end
-    if doHide then
-      mini.addTag(tagName)
-      printToAll(miniName..' hidden from players')
-    else
-      mini.removeTag(tagName)
-      printToAll(miniName..' shown to players')
-    end
+    setHidden(mini, doHide, true)
   end)
+end
+
+function isHidden(mini)
+  local tagName = 'Hidden'
+  return mini.hasTag(tagName)
+end
+
+function setHidden(mini, doHide, showMessage)
+  local tagName = 'Hidden'
+  mini.attachInvisibleHider('hideMiniToAll', doHide, {'Grey','White','Brown','Red','Orange','Yellow','Green','Teal','Blue','Purple','Pink'})
+  local miniName = mini.getName()
+  if miniName == '' then
+    miniName = 'Figurine'
+  end
+  local message
+  if doHide then
+    mini.addTag(tagName)
+    message = ' hidden from players'
+  else
+    mini.removeTag(tagName)
+    message = ' shown to players'
+  end
+  if showMessage then
+    printToAll(miniName..message)
+  end
 end
 
 function toggleEffect(mini, effectName, originalMiniName, scaleRatio)
