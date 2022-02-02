@@ -2,7 +2,8 @@
 -- Author: Thor's Hammer
 -- Adapted from Character Sheet Template by: MrStump
 
-sheets = {}
+sheetControls = {}
+sheetData = {}
 
 -- Public functions
 
@@ -36,10 +37,12 @@ function initializeSheet(params)
   if sheet.SaveDisabled==true then params.SavedData="" end
   if params.SavedData ~= "" then
     local loaded_data = JSON.decode(params.SavedData)
-    sheets[sheet.Object.getGUID()] = loaded_data
+    sheetData[sheet.Object.getGUID()] = loaded_data
   else
-    sheets[sheet.Object.getGUID()] = params.ControlData
+    sheetData[sheet.Object.getGUID()] = {}
   end
+
+  sheetControls[sheet.Object.getGUID()] = params.ControlData
 
   sheet.SpawnedButtonCount = 0
   _createCheckbox(sheet)
@@ -50,8 +53,12 @@ function initializeSheet(params)
   return sheet
 end
 
+function getControls(sheet)
+  return sheetControls[sheet.Object.getGUID()]
+end
+
 function getData(sheet)
-  return sheets[sheet.Object.getGUID()]
+  return sheetData[sheet.Object.getGUID()]
 end
 
 --[[
@@ -62,9 +69,10 @@ end
       value (string) - The value to update it to
 ]]
 function updateLabel(params)
-  local control = _getByMultiIndex(getData(params.sheet).label, params.indexer)
-  if control ~= nil then
-    control.value = params.value
+  local control = _getByMultiIndex(getControls(params.sheet), 'label', params.indexer)
+  local data = _getByMultiIndex(getData(params.sheet), 'label', params.indexer)
+  if control ~= nil and control.name ~= nil then
+    data.value = params.value
     params.sheet.Object.editButton({
       index = control.buttonIndex,
       label = params.value,
@@ -75,9 +83,15 @@ end
 
 -- Private functions
 
-function _getByMultiIndex(sheetData, indexer)
-  local curControl = sheetData
+function _getByMultiIndex(sheetData, section, indexer)
+  if sheetData[section] == nil then
+    sheetData[section] = {}
+  end
+  local curControl = sheetData[section]
   for i, idx in ipairs(indexer) do
+    if curControl[idx] == nil then
+      curControl[idx] = {}
+    end
     curControl = curControl[idx]
   end
   return curControl
@@ -92,47 +106,47 @@ end
 --Click functions for buttons
 
 --Checks or unchecks the given box
-function _click_checkbox(sheet, controlData)
-  if controlData.state == true then
-    controlData.state = false
-    sheet.Object.editButton({ index = controlData.buttonIndex, label = "" })
+function _click_checkbox(sheet, control, data)
+  if data.state == true then
+    data.state = false
+    sheet.Object.editButton({ index = control.buttonIndex, label = "" })
   else
-    controlData.state = true
-    sheet.Object.editButton({ index = controlData.buttonIndex, label = string.char(10008) })
+    data.state = true
+    sheet.Object.editButton({ index = control.buttonIndex, label = string.char(10008) })
   end
   _updateSave(sheet)
 end
 
 --Applies value to given counter display
-function _click_counter(sheet, controlData, amount)
-  controlData.value = controlData.value + amount
+function _click_counter(sheet, control, data, amount)
+  data.value = data.value + amount
   sheet.Object.editButton({
-    index = controlData.buttonIndex,
-    label = controlData.value
+    index = control.buttonIndex,
+    label = data.value
   })
   _updateSave(sheet)
 end
 
 --Updates saved value for given text box
-function _click_textbox(sheet, controlData, value, selected)
+function _click_textbox(sheet, control, data, value, selected)
   if selected == false then
-    controlData.value = value
+    data.value = value
     _updateSave(sheet)
   end
 end
 
 --Updates saved value for given select control
-function _click_select(sheet, controlData)
-  local opts = controlData.options
-  local nextIdx = controlData.index + 1
+function _click_select(sheet, control, data)
+  local opts = control.options
+  local nextIdx = data.index + 1
   if nextIdx > #opts then
     nextIdx = 1
   end
-  controlData.value = opts[nextIdx]
-  controlData.index = nextIdx
+  data.index = nextIdx
+  data.value = control.options[data.index]
   sheet.Object.editButton({
-    index = controlData.buttonIndex,
-    label = controlData.value
+    index = control.buttonIndex,
+    label = data.value
   })
   _updateSave(sheet)
 end
@@ -146,14 +160,18 @@ function _click_none() end
 
 --Makes checkboxes
 function _createCheckbox(sheet)
-  for i, data in pairs(_getControlData(getData(sheet).checkbox, {})) do
+  for i, control in pairs(_getFlattenedControls(getControls(sheet).checkbox)) do
+    local data = _getByMultiIndex(getData(sheet), 'checkbox', control.indexer)
+    data.state = data.state or control.state
+
     --Sets up reference function
-    data.buttonIndex = sheet.SpawnedButtonCount
+    control.buttonIndex = sheet.SpawnedButtonCount
+    local size = control.size or 100
     local funcName = sheet.Object.getGUID().."_checkbox"..i
     local func = function()
-      _click_checkbox(sheet, data)
-      if data.func then
-        sheet.Object.call(data.func, { data = data })
+      _click_checkbox(sheet, control, data)
+      if control.func then
+        sheet.Object.call(control.func, { control = control })
       end
     end
     self.setVar(funcName, func)
@@ -165,10 +183,10 @@ function _createCheckbox(sheet)
       label = label,
       click_function = funcName,
       function_owner = self,
-      position = data.pos,
-      height = data.size,
-      width = data.size,
-      font_size = data.size,
+      position = control.pos,
+      height = size,
+      width = size,
+      font_size = size,
       scale = sheet.ButtonScale,
       color = sheet.ButtonColor,
       font_color = sheet.ButtonFontColor
@@ -179,23 +197,27 @@ end
 
 --Makes counters
 function _createCounter(sheet)
-  for i, data in pairs(_getControlData(getData(sheet).counter, {})) do
+  for i, control in pairs(_getFlattenedControls(getControls(sheet).counter)) do
+    local data = _getByMultiIndex(getData(sheet), 'counter', control.indexer)
+    data.value = data.value or control.value
+
     --Sets up display
-    data.buttonIndex = sheet.SpawnedButtonCount
+    control.buttonIndex = sheet.SpawnedButtonCount
     --Sets up label
     local label = data.value
     --Sets height/width for display
-    local size = data.size
-    if data.hideBG == true then size = 0 end
+    local size = control.size or 100
+    local btnSize = size
+    if control.hideBG == true then btnSize = 0 end
     --Creates button and counts it
     sheet.Object.createButton({
       label = label,
       click_function = "_click_none",
       function_owner = self,
-      position = data.pos,
-      height = size,
-      width = size,
-      font_size = data.size,
+      position = control.pos,
+      height = btnSize,
+      width = btnSize,
+      font_size = size,
       scale = sheet.ButtonScale,
       color = sheet.ButtonColor,
       font_color = sheet.ButtonFontColor
@@ -205,10 +227,10 @@ function _createCounter(sheet)
     --Sets up add 1
     local funcName = sheet.Object.getGUID().."_counterAdd"..i
     local func = function()
-      if not data.max or data.max >= data.value + 1 then
-        _click_counter(sheet, data, 1)
-        if data.func then
-          sheet.Object.call(data.func, { data = data, delta = 1 })
+      if not control.max or control.max >= data.value + 1 then
+        _click_counter(sheet, control, data, 1)
+        if control.func then
+          sheet.Object.call(control.func, { control = control, data = data, delta = 1 })
         end
       end
     end
@@ -216,19 +238,19 @@ function _createCounter(sheet)
     --Sets up label
     local label = "+"
     --Sets up position
-    local offsetDistance = (data.size/2 + data.size/4) * (sheet.ButtonScale[1] * 0.002)
-    local pos = {data.pos[1] + offsetDistance, data.pos[2], data.pos[3]}
-    --Sets up size
-    local size = data.size / 2
+    local offsetDistance = (size/2 + size/4) * (sheet.ButtonScale[1] * 0.002)
+    local pos = {control.pos[1] + offsetDistance, control.pos[2], control.pos[3]}
+    --Sets up counter button size
+    local cntBtnSize = size / 2
     --Creates button and counts it
     sheet.Object.createButton({
       label = label,
       click_function = funcName,
       function_owner = self,
       position = pos,
-      height = size,
-      width = size,
-      font_size = size,
+      height = cntBtnSize,
+      width = cntBtnSize,
+      font_size = cntBtnSize,
       scale = sheet.ButtonScale,
       color = sheet.ButtonColor,
       font_color = sheet.ButtonFontColor
@@ -238,10 +260,10 @@ function _createCounter(sheet)
     --Sets up subtract 1
     local funcName = sheet.Object.getGUID().."_counterSub"..i
     local func = function()
-      if not data.min or data.min <= data.value - 1 then
-        _click_counter(sheet, data, -1)
-        if data.func then
-          sheet.Object.call(data.func, { data = data, delta = -1 })
+      if not control.min or control.min <= data.value - 1 then
+        _click_counter(sheet, control, data, -1)
+        if control.func then
+          sheet.Object.call(control.func, { control = control, data = data, delta = -1 })
         end
       end
     end
@@ -249,16 +271,16 @@ function _createCounter(sheet)
     --Sets up label
     local label = "-"
     --Set up position
-    local pos = {data.pos[1] - offsetDistance, data.pos[2], data.pos[3]}
+    local pos = {control.pos[1] - offsetDistance, control.pos[2], control.pos[3]}
     --Creates button and counts it
     sheet.Object.createButton({
       label = label,
       click_function = funcName,
       function_owner = self,
       position = pos,
-      height = size,
-      width = size,
-      font_size = size,
+      height = cntBtnSize,
+      width = cntBtnSize,
+      font_size = cntBtnSize,
       scale = sheet.ButtonScale,
       color = sheet.ButtonColor,
       font_color = sheet.ButtonFontColor
@@ -268,37 +290,40 @@ function _createCounter(sheet)
 end
 
 function _createTextbox(sheet)
-  local allControls = _getControlData(getData(sheet).textbox, {})
+  local allControls = _getFlattenedControls(getControls(sheet).textbox)
   table.sort(allControls, function(a, b)
     return (a.sortOrder or 0) < (b.sortOrder or 0)
   end)
-  for i, data in pairs(allControls) do
+  for i, control in pairs(allControls) do
+    local data = _getByMultiIndex(getData(sheet), 'textbox', control.indexer)
+    data.value = data.value or control.value
+
     --Sets up reference function
     local funcName = sheet.Object.getGUID().."_textbox"..i
     local func = function(_,_,val,sel)
-      _click_textbox(sheet, data, val, sel)
-      if data.func then
-        sheet.Object.call(data.func, { data = data, isSelected = sel })
+      _click_textbox(sheet, control, data, val, sel)
+      if control.func then
+        sheet.Object.call(control.func, { control = control, data = data, isSelected = sel })
       end
     end
     self.setVar(funcName, func)
 
     local bgColor = { sheet.InputColor[1], sheet.InputColor[2], sheet.InputColor[3] }
     local fontColor = { sheet.InputFontColor[1], sheet.InputFontColor[2], sheet.InputFontColor[3] }
-    if data.hideBG then
+    if control.hideBG then
       table.insert(bgColor, 0)
       table.insert(fontColor, 255)
     end
     sheet.Object.createInput({
       input_function = funcName,
       function_owner = self,
-      label          = data.label or "",
-      alignment      = data.alignment,
-      position       = data.pos,
+      label          = control.label or "",
+      alignment      = control.alignment,
+      position       = control.pos,
       scale          = sheet.ButtonScale,
-      width          = data.width,
-      height         = (data.font_size*data.rows)+24,
-      font_size      = data.font_size,
+      width          = control.width,
+      height         = control.height or (control.font_size*control.rows)+24,
+      font_size      = control.font_size,
       color          = bgColor,
       font_color     = fontColor,
       value          = data.value or "",
@@ -307,29 +332,32 @@ function _createTextbox(sheet)
 end
 
 function _createSelect(sheet)
-  for i, data in pairs(_getControlData(getData(sheet).select, {})) do
-    data.buttonIndex = sheet.SpawnedButtonCount
+  for i, control in pairs(_getFlattenedControls(getControls(sheet).select)) do
+    local data = _getByMultiIndex(getData(sheet), 'select', control.indexer)
+    data.index = data.index or control.index
+
+    control.buttonIndex = sheet.SpawnedButtonCount
     --Defaults current shown value to placeholder if nothing selected
-    local label = data.value
+    local label = control.options[data.index]
     if data.index == nil then
       data.index = 0
     end
     if data.index == 0 then
-      label = data.label or 'Click to Select'
+      label = control.label or 'Click to Select'
     end
     --Sets up reference function
     local funcName = sheet.Object.getGUID().."_select"..i
     local func = function(_,_,val)
-      _click_select(sheet, data)
-      if data.func then
-        sheet.Object.call(data.func, { data = data })
+      _click_select(sheet, control, data)
+      if control.func then
+        sheet.Object.call(control.func, { control = control, data = data })
       end
     end
     self.setVar(funcName, func)
 
     local bgColor = { sheet.ButtonColor[1], sheet.ButtonColor[2], sheet.ButtonColor[3] }
     local fontColor = { sheet.ButtonFontColor[1], sheet.ButtonFontColor[2], sheet.ButtonFontColor[3] }
-    if data.hideBG then
+    if control.hideBG then
       table.insert(bgColor, 0)
       table.insert(fontColor, 255)
     end
@@ -338,11 +366,11 @@ function _createSelect(sheet)
       click_function = funcName,
       function_owner = self,
       label          = label,
-      position       = data.pos,
+      position       = control.pos,
       scale          = sheet.ButtonScale,
-      width          = data.width,
-      height         = data.font_size+24,
-      font_size      = data.font_size,
+      width          = control.width,
+      height         = control.font_size+24,
+      font_size      = control.font_size,
       color          = bgColor,
       font_color     = fontColor,
     })
@@ -351,11 +379,14 @@ function _createSelect(sheet)
 end
 
 function _createLabel(sheet)
-  for i, data in pairs(_getControlData(getData(sheet).label, {})) do
-    data.buttonIndex = sheet.SpawnedButtonCount
+  for i, control in pairs(_getFlattenedControls(getControls(sheet).label)) do
+    local data = _getByMultiIndex(getData(sheet), 'label', control.indexer)
+    data.value = data.value or control.value
+
+    control.buttonIndex = sheet.SpawnedButtonCount
     local bgColor = { sheet.InputColor[1], sheet.InputColor[2], sheet.InputColor[3] }
     local fontColor = { sheet.InputFontColor[1], sheet.InputFontColor[2], sheet.InputFontColor[3] }
-    if data.hideBG then
+    if control.hideBG then
       table.insert(bgColor, 0)
       table.insert(fontColor, 255)
     end
@@ -364,11 +395,11 @@ function _createLabel(sheet)
       click_function = '_click_none',
       function_owner = self,
       label          = data.value,
-      position       = data.pos,
+      position       = control.pos,
       scale          = sheet.ButtonScale,
-      width          = data.width,
-      height         = (data.font_size*data.rows)+24,
-      font_size      = data.font_size,
+      width          = control.width,
+      height         = (control.font_size*control.rows)+24,
+      font_size      = control.font_size,
       color          = bgColor,
       font_color     = fontColor,
     })
@@ -378,13 +409,21 @@ end
 
 -- helpers
 
-function _getControlData(items, defaultAttrs)
+function _getFlattenedControls(items, indexer, defaultAttrs)
   local controls = {}
+  if indexer == nil then indexer = {} end
+  if defaultAttrs == nil then defaultAttrs = {} end
 
   if items ~= nil then
     for key, item in pairs(items) do
+      local idxer = {}
+      for k, v in ipairs(indexer) do
+        idxer[k] = v
+      end
+      table.insert(idxer, key)
       if item.fields ~= nil then
-        local children = _getControlData(item.fields, item)
+        table.insert(idxer, 'fields')
+        local children = _getFlattenedControls(item.fields, idxer, item)
         for _, c in pairs(children) do
           table.insert(controls, c)
         end
@@ -406,6 +445,7 @@ function _getControlData(items, defaultAttrs)
 
         result.name = key
         items[key] = result
+        result.indexer = idxer
         table.insert(controls, result)
       end
     end

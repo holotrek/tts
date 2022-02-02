@@ -39,13 +39,18 @@ function loadMainSheetData()
     checkbox = {},
     counter = {},
     textbox = {},
+    select = {},
     label = {},
   }
-  for _, s in ipairs(self.getStates()) do
-    if s.name == 'D&D 5e Character Sheet' then
-      local json = s.lua_script_state
-      if json ~= '' then
-        mainSheetData = JSON.decode(json)
+
+  local states = self.getStates()
+  if states ~= nil and #states > 0 then
+    for _, s in ipairs(states) do
+      if s.name == 'D&D 5e Character Sheet' then
+        local json = s.lua_script_state
+        if json ~= '' then
+          mainSheetData = JSON.decode(json)
+        end
       end
     end
   end
@@ -58,7 +63,7 @@ function loadMainSheetData()
     })
   end
 
-  if mainSheetData.textbox.Overview and mainSheetData.select.Overview.fields.Class then
+  if mainSheetData.select.Overview and mainSheetData.select.Overview.fields.Class then
     local class = mainSheetData.select.Overview.fields.Class.value
     local abilityMod = classAbilityMap[class] or 'None'
     sheetHelper.updateLabel({
@@ -279,13 +284,12 @@ defaultButtonData = {
       pos       = the position (pasted from the helper tool)
       rows      = how many lines of text you want for this box
       width     = how wide the text box is
-      font_size = size of text. This and "rows" affect overall height
+      font_size = size of text. This and "rows" effect overall height
       label     = what is shown when there is no text. "" = nothing
       value     = text entered into box. "" = nothing
       alignment = Number to indicate how you want text aligned
                   (1=Automatic, 2=Left, 3=Center, 4=Right, 5=Justified)
       hideBG    = if background of counter is hidden (true=hidden, false=not)
-      sortOrder = the order in which you want the textboxes to be tabbed to
       func      = name of function that takes the index from this table,
                   the value, and whether it is currently selected
     ]]
@@ -417,39 +421,15 @@ defaultButtonData = {
     },
     --End of textboxes
   },
-  --Add selects
-  select = {
-    --[[
-      name      = unique name of the select
-      pos       = the position (pasted from the helper tool)
-      width     = how wide the text box is
-      font_size = size of text. This affects overall height
-      hideBG    = if background of select is hidden (true=hidden, false=not)
-      label     = placeholder to show when no value is selected
-      options   = the options available to select from
-      value     = text shown
-    ]]
-    -- Overview = {
-    --   width     = 2250,
-    --   font_size = 400,
-    --   alignment = 2,
-    --   fields = {
-    --     Class = {
-    --       pos       = {0.05,0.05,-1.84},
-    --       label     = "Class",
-    --       options   = {'Barbarian','Bard','Cleric','Druid','Fighter','Monk','Paladin','Ranger','Rogue','Sorceror','Warlock','Wizard'}
-    --     },
-    --   },
-    -- },
-  },
   --Add noneditable labels
   label = {
     --[[
       name      = unique name of the label
       pos       = the position (pasted from the helper tool)
-      width     = how wide the label is
-      font_size = size of text. This and "rows" affect overall height
-      hideBG    = if background of label is hidden (true=hidden, false=not)
+      rows      = how many lines of text you want for this box
+      width     = how wide the text box is
+      font_size = size of text. This and "rows" effect overall height
+      hideBG    = if background of counter is hidden (true=hidden, false=not)
       value     = text shown
     ]]
     Level = {

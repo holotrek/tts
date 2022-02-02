@@ -48,14 +48,14 @@ skillThrowModMap = {
 function changeLevel(params)
   sheetHelper.updateLabel({
     sheet = sheet,
-    value = params.data.value,
+    value = params.data.value..' d',
     indexer = { 'HitDiceTotal' }
   })
 end
 
 function changeModifier(params)
   local newVal = params.data.value
-  local modType = params.data.name
+  local modType = params.control.name
   local mod = math.floor((newVal - 10) / 2)
   sheetHelper.updateLabel({
     sheet = sheet,
@@ -66,7 +66,7 @@ function changeModifier(params)
 end
 
 function toggleProficiency(params)
-  local stat = string.gsub(params.data.name, 'Prof', '')
+  local stat = string.gsub(params.control.name, 'Prof', '')
   adjustSavingThrowOrSkill(stat)
 end
 
@@ -334,6 +334,15 @@ defaultButtonData = {
         },
       },
     },
+    HitDieType = {
+      pos       = {-0.155,0.05,-0.395},
+      rows      = 1,
+      width     = 500,
+      font_size = 300,
+      label     = "X",
+      alignment = 2,
+      sortOrder = 14,
+    },
     HitDice = {
       pos       = {-0.235,0.05,-0.295},
       rows      = 1,
@@ -341,26 +350,27 @@ defaultButtonData = {
       font_size = 400,
       label     = "Cur Dice",
       alignment = 3,
-      sortOrder = 14,
+      sortOrder = 15,
     },
     Attacks = {
       rows      = 1,
       width     = 1700,
-      font_size = 400,
+      height    = 424,
+      font_size = 250,
       alignment = 3,
       fields = {
         Attack1 = {
           pos = {-0.276,0.05,0.023},
           label = "Weapon1",
-          sortOrder = 15,
+          sortOrder = 16,
         },
         Attack2 = {
           pos = {-0.276,0.05,0.133},
-          sortOrder = 18,
+          sortOrder = 19,
         },
         Attack3 = {
           pos = {-0.276,0.05,0.243},
-          sortOrder = 21,
+          sortOrder = 22,
         },
       },
     },
@@ -373,15 +383,15 @@ defaultButtonData = {
         AttackBonus1 = {
           pos = {0.005,0.05,0.023},
           label = "+0",
-          sortOrder = 16,
+          sortOrder = 17,
         },
         AttackBonus2 = {
           pos = {0.005,0.05,0.133},
-          sortOrder = 19,
+          sortOrder = 20,
         },
         AttackBonus3 = {
           pos = {0.005,0.05,0.243},
-          sortOrder = 22,
+          sortOrder = 23,
         },
       },
     },
@@ -394,35 +404,35 @@ defaultButtonData = {
         AttackDamage1 = {
           pos = {0.280,0.05,0.023},
           label = "1d8 + 1",
-          sortOrder = 17,
+          sortOrder = 18,
         },
         AttackDamage2 = {
           pos = {0.280,0.05,0.133},
-          sortOrder = 20,
+          sortOrder = 21,
         },
         AttackDamage3 = {
           pos = {0.280,0.05,0.243},
-          sortOrder = 23,
+          sortOrder = 24,
         },
       },
     },
     OtherAttacks = {
       pos       = {0.0,0.05,0.62},
-      rows      = 6,
+      rows      = 12,
       width     = 4500,
-      font_size = 500,
-      alignment = 2,
-      sortOrder = 24,
-    },
-    OtherProficienciesAndLanguages = {
-      pos       = {-1.02,0.05,1.59},
-      rows      = 6,
-      width     = 4450,
-      font_size = 550,
+      font_size = 250,
       alignment = 2,
       sortOrder = 25,
     },
-    Equipment = {
+    OtherProficienciesAndLanguages = {
+      pos       = {-1.02,0.05,1.59},
+      rows      = 12,
+      width     = 4450,
+      font_size = 225,
+      alignment = 2,
+      sortOrder = 26,
+    },
+    Coinage = {
       rows      = 1,
       width     = 750,
       font_size = 450,
@@ -431,43 +441,44 @@ defaultButtonData = {
         Copper = {
           pos       = {-0.335,0.05,1.14},
           label     = "CP",
-          sortOrder = 26,
+          sortOrder = 27,
         },
         Silver = {
           pos       = {-0.335,0.05,1.28},
           label     = "SP",
-          sortOrder = 27,
+          sortOrder = 28,
         },
         Electrum = {
           pos       = {-0.335,0.05,1.42},
           label     = "EP",
-          sortOrder = 28,
+          sortOrder = 29,
         },
         Gold = {
           pos       = {-0.335,0.05,1.56},
           label     = "GP",
-          sortOrder = 29,
+          sortOrder = 30,
         },
         Platinum = {
           pos       = {-0.335,0.05,1.70},
           label     = "PP",
-          sortOrder = 30,
-        },
-        Other = {
-          pos       = {0.13,0.05,1.5},
-          rows      = 9,
-          width     = 3250,
-          alignment = 2,
           sortOrder = 31,
-        }
+        },
       },
+    },
+    Equipment = {
+      pos       = {0.13,0.05,1.5},
+      rows      = 18,
+      width     = 3250,
+      font_size = 225,
+      alignment = 2,
+      sortOrder = 32,
     },
     Personality = {
       rows      = 4,
       width     = 4000,
       font_size = 250,
       alignment = 2,
-      sortOrder = 32,
+      sortOrder = 33,
       fields = {
         {1.02,0.05,-1.26},
         {1.02,0.05,-0.92},
@@ -477,11 +488,11 @@ defaultButtonData = {
     },
     FeaturesAndTraits = {
       pos       = {1.02,0.05,0.95},
-      rows      = 19,
+      rows      = 38,
       width     = 4500,
-      font_size = 500,
+      font_size = 250,
       alignment = 2,
-      sortOrder = 33,
+      sortOrder = 34,
     },
     --End of textboxes
   },
@@ -579,11 +590,11 @@ defaultButtonData = {
       }
     },
     HitDiceTotal = {
-      pos       = {-0.204,0.05,-0.395},
+      pos       = {-0.275,0.05,-0.395},
       rows      = 1,
       width     = 500,
       font_size = 400,
-      value     = "1",
+      value     = "1 d",
       hideBG    = true,
     },
     --End of labels

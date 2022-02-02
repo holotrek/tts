@@ -9,7 +9,7 @@ function onLoad(save_state)
     SheetObj = self,
     SavedData = save_state,
     ControlData = defaultButtonData,
-    DisableSave = false,
+    DisableSave = true,
     ButtonColor = {0,0.8,0.8}
   })
   loadMainSheetData()
@@ -22,13 +22,18 @@ function loadMainSheetData()
     checkbox = {},
     counter = {},
     textbox = {},
+    select = {},
     label = {},
   }
-  for _, s in ipairs(self.getStates()) do
-    if s.name == 'D&D 5e Character Sheet' then
-      local json = s.lua_script_state
-      if json ~= '' then
-        mainSheetData = JSON.decode(json)
+
+  local states = self.getStates()
+  if states ~= nil and #states > 0 then
+    for _, s in ipairs(states) do
+      if s.name == 'D&D 5e Character Sheet' then
+        local json = s.lua_script_state
+        if json ~= '' then
+          mainSheetData = JSON.decode(json)
+        end
       end
     end
   end
@@ -102,13 +107,12 @@ defaultButtonData = {
       pos       = the position (pasted from the helper tool)
       rows      = how many lines of text you want for this box
       width     = how wide the text box is
-      font_size = size of text. This and "rows" affect overall height
+      font_size = size of text. This and "rows" effect overall height
       label     = what is shown when there is no text. "" = nothing
       value     = text entered into box. "" = nothing
       alignment = Number to indicate how you want text aligned
                   (1=Automatic, 2=Left, 3=Center, 4=Right, 5=Justified)
       hideBG    = if background of counter is hidden (true=hidden, false=not)
-      sortOrder = the order in which you want the textboxes to be tabbed to
       func      = name of function that takes the index from this table,
                   the value, and whether it is currently selected
     ]]
@@ -152,9 +156,9 @@ defaultButtonData = {
     },
     AlliesAndOrganizations = {
       pos       = {0.024,0.05,-0.85},
-      rows      = 14,
+      rows      = 19,
       width     = 4600,
-      font_size = 400,
+      font_size = 300,
       label     = "Allies & Organizations",
       alignment = 2,
       sortOrder = 7,
@@ -170,17 +174,17 @@ defaultButtonData = {
     },
     Backstory = {
       pos       = {-1.02,0.05,0.95},
-      rows      = 19,
+      rows      = 38,
       width     = 4450,
-      font_size = 500,
+      font_size = 250,
       label     = "Character Backstory",
       alignment = 2,
       sortOrder = 9,
     },
     FeaturesAndTraits = {
-      rows      = 13,
+      rows      = 21,
       width     = 4600,
-      font_size = 400,
+      font_size = 250,
       alignment = 2,
       sortOrder = 10,
       fields = {
@@ -192,9 +196,9 @@ defaultButtonData = {
       },
     },
     Treasure = {
-      rows      = 9,
+      rows      = 16,
       width     = 4600,
-      font_size = 400,
+      font_size = 250,
       alignment = 2,
       sortOrder = 11,
       fields = {
@@ -207,39 +211,15 @@ defaultButtonData = {
     },
     --End of textboxes
   },
-  --Add selects
-  select = {
-    --[[
-      name      = unique name of the select
-      pos       = the position (pasted from the helper tool)
-      width     = how wide the text box is
-      font_size = size of text. This affects overall height
-      hideBG    = if background of select is hidden (true=hidden, false=not)
-      label     = placeholder to show when no value is selected
-      options   = the options available to select from
-      value     = text shown
-    ]]
-    -- Overview = {
-    --   width     = 2250,
-    --   font_size = 400,
-    --   alignment = 2,
-    --   fields = {
-    --     Class = {
-    --       pos       = {0.05,0.05,-1.84},
-    --       label     = "Class",
-    --       options   = {'Barbarian','Bard','Cleric','Druid','Fighter','Monk','Paladin','Ranger','Rogue','Sorceror','Warlock','Wizard'}
-    --     },
-    --   },
-    -- },
-  },
   --Add noneditable labels
   label = {
     --[[
       name      = unique name of the label
       pos       = the position (pasted from the helper tool)
-      width     = how wide the label is
-      font_size = size of text. This and "rows" affect overall height
-      hideBG    = if background of label is hidden (true=hidden, false=not)
+      rows      = how many lines of text you want for this box
+      width     = how wide the text box is
+      font_size = size of text. This and "rows" effect overall height
+      hideBG    = if background of counter is hidden (true=hidden, false=not)
       value     = text shown
     ]]
     Level = {
